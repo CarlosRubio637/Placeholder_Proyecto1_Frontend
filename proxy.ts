@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/session";
 
-const publicRoutes = ["/login"];
+const publicRoutes = ["/login", "/registro"];
 
 // Chequeo optimista: solo verifica que exista la cookie de sesión.
 // Si el backend expone un token verificable (p. ej. JWT), validarlo aquí.
