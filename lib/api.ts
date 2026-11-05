@@ -47,7 +47,8 @@ export type CurrentUser = {
   id: string;
   email: string;
   role: Role;
-  fullName: string;
+  // null si la cuenta todavía no tiene perfil (por ejemplo, el usuario demo).
+  fullName: string | null;
   unit: { id: string; code: string } | null;
 };
 
