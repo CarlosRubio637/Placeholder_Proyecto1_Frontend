@@ -13,7 +13,10 @@ export type NavItem = {
 //   - Administrador:  app/(admin)/admin/<ruta>       → /admin/<ruta>
 //   - Seguridad:      app/(seguridad)/seguridad/<ruta> → /seguridad/<ruta>
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
-  RESIDENTE: [{ href: "/", label: "Inicio" }],
+  RESIDENTE: [
+    { href: "/", label: "Inicio" },
+    { href: "/incidencias/nueva", label: "Reportar incidencia" },
+  ],
   ADMINISTRADOR: [{ href: "/", label: "Inicio" }],
   SEGURIDAD: [{ href: "/", label: "Inicio" }],
 };
