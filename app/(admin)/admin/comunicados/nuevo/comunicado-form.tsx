@@ -47,6 +47,7 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
   const [editedSinceSubmit, setEditedSinceSubmit] = useState<Set<ComunicadoField>>(new Set());
   const [notice, setNotice] = useState<string>();
   const [question, setQuestion] = useState<string>();
+  const [confirmedValues, setConfirmedValues] = useState<ComunicadoValues>();
   const [checking, setChecking] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -54,7 +55,6 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
   const hasErrors = Object.keys(clientErrors).length > 0;
   const busy = pending || checking;
   const formError = notice ?? (editedSinceSubmit.size === 0 ? state.formError : undefined);
-  const selectedTowers = towers.filter((tower) => values.towerIds.includes(tower.id));
 
   function errorFor(field: ComunicadoField) {
     const clientError = touched[field] ? clientErrors[field] : undefined;
@@ -84,11 +84,12 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
     setTouched(ALL_TOUCHED);
     if (hasErrors || busy) return;
 
+    const snapshot = values;
     setNotice(undefined);
     setChecking(true);
     let outcome: AudienciaResult;
     try {
-      outcome = await contarAudiencia(values.allTowers ? [] : values.towerIds);
+      outcome = await contarAudiencia(snapshot.allTowers ? [] : snapshot.towerIds);
     } catch (error) {
       unstable_rethrow(error);
       setNotice(MESSAGES.audienceFailed);
@@ -101,22 +102,25 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
       setNotice(outcome.error);
       return;
     }
-    const label = audienceLabel(values.allTowers ? null : selectedTowers);
+    const selectedTowers = towers.filter((tower) => snapshot.towerIds.includes(tower.id));
+    const label = audienceLabel(snapshot.allTowers ? null : selectedTowers);
     setQuestion(confirmationQuestion(outcome.recipientCount, label));
+    setConfirmedValues(snapshot);
     dialog.current?.showModal();
   }
 
   function confirmPublication() {
     dialog.current?.close();
+    if (!confirmedValues) return;
     const formData = new FormData();
-    formData.set("title", values.title);
-    formData.set("body", values.body);
-    formData.set("category", values.category);
-    formData.set("expiresOn", values.expiresOn);
-    if (values.allTowers) {
+    formData.set("title", confirmedValues.title);
+    formData.set("body", confirmedValues.body);
+    formData.set("category", confirmedValues.category);
+    formData.set("expiresOn", confirmedValues.expiresOn);
+    if (confirmedValues.allTowers) {
       formData.set("allTowers", "on");
     } else {
-      values.towerIds.forEach((towerId) => formData.append("towerIds", towerId));
+      confirmedValues.towerIds.forEach((towerId) => formData.append("towerIds", towerId));
     }
     setEditedSinceSubmit(new Set());
     startTransition(() => formAction(formData));
@@ -132,127 +136,129 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="title" className="text-sm font-medium">
-          Título
-        </label>
-        <input
-          id="title"
-          name="title"
-          value={values.title}
-          onChange={(e) => update("title", { title: e.target.value })}
-          onBlur={() => touch("title")}
-          maxLength={LIMITS.titleMax}
-          aria-invalid={errorFor("title") ? true : undefined}
-          aria-describedby={describedBy("title")}
-          className={inputClass}
-        />
-        <FieldMessage field="title" error={errorFor("title")} hint="5 a 100 caracteres" />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="body" className="text-sm font-medium">
-          Contenido
-        </label>
-        <textarea
-          id="body"
-          name="body"
-          rows={5}
-          value={values.body}
-          onChange={(e) => update("body", { body: e.target.value })}
-          onBlur={() => touch("body")}
-          maxLength={LIMITS.bodyMax}
-          aria-invalid={errorFor("body") ? true : undefined}
-          aria-describedby={describedBy("body")}
-          className={`${inputClass} resize-y`}
-        />
-        <FieldMessage
-          field="body"
-          error={errorFor("body")}
-          hint="10 a 2,000 caracteres"
-          count={`${values.body.trim().length}/${LIMITS.bodyMax}`}
-        />
-      </div>
-
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2">
+      <fieldset disabled={busy} className="flex min-w-0 flex-col gap-5">
         <div className="flex flex-col gap-1">
-          <label htmlFor="category" className="text-sm font-medium">
-            Categoría
-          </label>
-          <select
-            id="category"
-            name="category"
-            value={values.category}
-            onChange={(e) => update("category", { category: e.target.value as Categoria })}
-            aria-invalid={errorFor("category") ? true : undefined}
-            aria-describedby={describedBy("category")}
-            className={`${inputClass} bg-background`}
-          >
-            {CATEGORY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <FieldMessage field="category" error={errorFor("category")} hint="" />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="expiresOn" className="text-sm font-medium">
-            Fin de vigencia
+          <label htmlFor="title" className="text-sm font-medium">
+            Título
           </label>
           <input
-            id="expiresOn"
-            name="expiresOn"
-            type="date"
-            min={bounds.min}
-            max={bounds.max}
-            value={values.expiresOn}
-            onChange={(e) => update("expiresOn", { expiresOn: e.target.value })}
-            onBlur={() => touch("expiresOn")}
-            aria-invalid={errorFor("expiresOn") ? true : undefined}
-            aria-describedby={describedBy("expiresOn")}
+            id="title"
+            name="title"
+            value={values.title}
+            onChange={(e) => update("title", { title: e.target.value })}
+            onBlur={() => touch("title")}
+            maxLength={LIMITS.titleMax}
+            aria-invalid={errorFor("title") ? true : undefined}
+            aria-describedby={describedBy("title")}
             className={inputClass}
           />
-          <FieldMessage field="expiresOn" error={errorFor("expiresOn")} hint="Mañana a 90 días" />
+          <FieldMessage field="title" error={errorFor("title")} hint="5 a 100 caracteres" />
         </div>
-      </div>
 
-      <fieldset className="flex flex-col gap-3" aria-describedby={describedBy("towerIds")}>
-        <legend className="sr-only">Audiencia</legend>
-        <label className="flex items-center gap-3 text-sm font-medium">
-          <input
-            type="checkbox"
-            role="switch"
-            name="allTowers"
-            checked={values.allTowers}
-            onChange={(e) => {
-              update("towerIds", { allTowers: e.target.checked });
-              touch("towerIds");
-            }}
-            className="h-5 w-9 accent-emerald-700"
+        <div className="flex flex-col gap-1">
+          <label htmlFor="body" className="text-sm font-medium">
+            Contenido
+          </label>
+          <textarea
+            id="body"
+            name="body"
+            rows={5}
+            value={values.body}
+            onChange={(e) => update("body", { body: e.target.value })}
+            onBlur={() => touch("body")}
+            maxLength={LIMITS.bodyMax}
+            aria-invalid={errorFor("body") ? true : undefined}
+            aria-describedby={describedBy("body")}
+            className={`${inputClass} resize-y`}
           />
-          Todo el condominio
-        </label>
-        <div className="flex flex-wrap gap-x-5 gap-y-2">
-          {towers.map((tower) => (
-            <label
-              key={tower.id}
-              className={`flex items-center gap-2 text-sm ${values.allTowers ? "text-zinc-400" : ""}`}
-            >
-              <input
-                type="checkbox"
-                name="towerIds"
-                value={tower.id}
-                disabled={values.allTowers}
-                checked={values.towerIds.includes(tower.id)}
-                onChange={(e) => toggleTower(tower.id, e.target.checked)}
-              />
-              {tower.name}
-            </label>
-          ))}
+          <FieldMessage
+            field="body"
+            error={errorFor("body")}
+            hint="10 a 2,000 caracteres"
+            count={`${values.body.trim().length}/${LIMITS.bodyMax}`}
+          />
         </div>
-        <FieldMessage field="towerIds" error={errorFor("towerIds")} hint="" />
+
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="category" className="text-sm font-medium">
+              Categoría
+            </label>
+            <select
+              id="category"
+              name="category"
+              value={values.category}
+              onChange={(e) => update("category", { category: e.target.value as Categoria })}
+              aria-invalid={errorFor("category") ? true : undefined}
+              aria-describedby={describedBy("category")}
+              className={`${inputClass} bg-background`}
+            >
+              {CATEGORY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <FieldMessage field="category" error={errorFor("category")} hint="" />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="expiresOn" className="text-sm font-medium">
+              Fin de vigencia
+            </label>
+            <input
+              id="expiresOn"
+              name="expiresOn"
+              type="date"
+              min={bounds.min}
+              max={bounds.max}
+              value={values.expiresOn}
+              onChange={(e) => update("expiresOn", { expiresOn: e.target.value })}
+              onBlur={() => touch("expiresOn")}
+              aria-invalid={errorFor("expiresOn") ? true : undefined}
+              aria-describedby={describedBy("expiresOn")}
+              className={inputClass}
+            />
+            <FieldMessage field="expiresOn" error={errorFor("expiresOn")} hint="Mañana a 90 días" />
+          </div>
+        </div>
+
+        <fieldset className="flex flex-col gap-3" aria-describedby={describedBy("towerIds")}>
+          <legend className="sr-only">Audiencia</legend>
+          <label className="flex items-center gap-3 text-sm font-medium">
+            <input
+              type="checkbox"
+              role="switch"
+              name="allTowers"
+              checked={values.allTowers}
+              onChange={(e) => {
+                update("towerIds", { allTowers: e.target.checked });
+                touch("towerIds");
+              }}
+              className="h-5 w-9 accent-emerald-700"
+            />
+            Todo el condominio
+          </label>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {towers.map((tower) => (
+              <label
+                key={tower.id}
+                className={`flex items-center gap-2 text-sm ${values.allTowers ? "text-zinc-400" : ""}`}
+              >
+                <input
+                  type="checkbox"
+                  name="towerIds"
+                  value={tower.id}
+                  disabled={values.allTowers}
+                  checked={values.towerIds.includes(tower.id)}
+                  onChange={(e) => toggleTower(tower.id, e.target.checked)}
+                />
+                {tower.name}
+              </label>
+            ))}
+          </div>
+          <FieldMessage field="towerIds" error={errorFor("towerIds")} hint="" />
+        </fieldset>
       </fieldset>
 
       <p aria-live="polite" className={formError ? "text-sm text-red-600" : "sr-only"}>
