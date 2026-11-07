@@ -1,16 +1,20 @@
 import { apiFetch } from "@/lib/api";
 
-// Tipos y consultas del módulo de paquetería (H19). Solo para Server
-// Components y Server Functions: usa apiFetch, que lee la cookie de sesión.
+// Tipos y consultas de paquetería (H19 y H20). Solo para Server Components y
+// Server Functions: usa apiFetch, que lee la cookie de sesión.
 
 export const PAQUETES_PATH = "/seguridad/paquetes";
+export const MIS_PAQUETES_PATH = "/paquetes";
 export const PAGE_SIZE = 20;
+export const MIS_PAQUETES_PAGE_SIZE = 10;
 
 export type PackageStatus = "PENDIENTE_ENTREGA" | "ENTREGADO";
 
 export type Torre = { id: string; name: string; letter: string };
 export type UnidadRef = { id: string; code: string };
 export type Unidad = UnidadRef & { number: string };
+
+// ----------------- H19 -----------------
 
 export type Paquete = {
   id: string;
@@ -59,6 +63,44 @@ export async function getPaquetes(filtros: PaquetesFiltros): Promise<PaqueteList
   return res.json();
 }
 
+// ----------------- H20 -----------------
+
+export type MiPaquete = {
+  id: string;
+  code: string;
+  courier: string;
+  trackingNumber: string | null;
+  notes: string | null;
+  receivedAt: string;
+  daysWaiting: number;
+  deliveredAt: string | null;
+  pickedUpByName: string | null;
+  pickedUpByDocLast4: string | null;
+};
+
+export type MisPaquetesLista = {
+  pendingCount: number;
+  data: MiPaquete[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export async function getMisPaquetes(
+  status: PackageStatus,
+  page: number,
+): Promise<MisPaquetesLista> {
+  const params = new URLSearchParams();
+  params.set("status", status);
+  params.set("page", String(page));
+  params.set("pageSize", String(MIS_PAQUETES_PAGE_SIZE));
+  const res = await apiFetch(`paquetes/mios?${params.toString()}`);
+  if (!res.ok) throw new Error(`GET paquetes/mios respondió ${res.status}`);
+  return res.json();
+}
+
+// ----------------- Formato de fechas -----------------
+
 // DD/MM/AAAA HH:mm, en hora de El Salvador.
 const formatter = new Intl.DateTimeFormat("es-SV", {
   timeZone: "America/El_Salvador",
@@ -73,6 +115,5 @@ const formatter = new Intl.DateTimeFormat("es-SV", {
 export function formatRecibido(iso: string): string {
   const ms = Date.parse(iso);
   if (Number.isNaN(ms)) return "—";
-  // Intl pone ", " entre fecha y hora; la vista usa un solo espacio.
   return formatter.format(ms).replace(", ", " ");
 }
