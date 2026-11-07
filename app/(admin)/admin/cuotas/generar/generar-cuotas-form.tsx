@@ -146,107 +146,109 @@ export function GenerarCuotasForm({ today }: { today: string }) {
     void openConfirmation();
   }
 
-  const describedBy = (field: GeneracionField, hint?: boolean) =>
-    errorFor(field) ? `${field}-error` : hint ? `${field}-hint` : undefined;
+  const describedBy = (field: GeneracionField) =>
+    errorFor(field) ? `${field}-error` : `${field}-hint`;
 
   const firstDayOfPeriod = `${values.period}-01`;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="period" className="text-sm font-medium">
-            Periodo
-          </label>
-          <select
-            id="period"
-            name="period"
-            value={values.period}
-            onChange={(e) => changePeriod(e.target.value)}
-            aria-invalid={errorFor("period") ? true : undefined}
-            aria-describedby={describedBy("period")}
-            className={`${inputClass} bg-background`}
-          >
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <FieldError field="period" error={errorFor("period")} />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="amount" className="text-sm font-medium">
-            Monto por unidad ($)
-          </label>
-          <input
-            id="amount"
-            name="amount"
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            min={LIMITS.minAmount}
-            max={LIMITS.maxAmount}
-            value={values.amount}
-            onChange={(e) => update("amount", e.target.value)}
-            onBlur={() => touch("amount")}
-            placeholder="0.00"
-            aria-invalid={errorFor("amount") ? true : undefined}
-            aria-describedby={describedBy("amount")}
-            className={`${inputClass} tabular-nums`}
-          />
-          <FieldError field="amount" error={errorFor("amount")} />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="dueDate" className="text-sm font-medium">
-            Fecha de vencimiento
-          </label>
-          <input
-            id="dueDate"
-            name="dueDate"
-            type="date"
-            min={today > firstDayOfPeriod ? today : firstDayOfPeriod}
-            max={lastDayOf(values.period)}
-            value={values.dueDate}
-            onChange={(e) => update("dueDate", e.target.value)}
-            onBlur={() => touch("dueDate")}
-            aria-invalid={errorFor("dueDate") ? true : undefined}
-            aria-describedby={describedBy("dueDate")}
-            className={inputClass}
-          />
-          <FieldError field="dueDate" error={errorFor("dueDate")} />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline justify-between gap-2">
-            <label htmlFor="concept" className="text-sm font-medium">
-              Concepto <span className="font-normal text-zinc-500">(opcional)</span>
-            </label>
-            <span id="concept-hint" className="text-xs text-zinc-500 tabular-nums">
-              {clean.concept.length}/{LIMITS.conceptMax}
-            </span>
-          </div>
-          <input
-            id="concept"
-            name="concept"
-            value={values.concept}
-            onChange={(e) => {
-              setConceptEdited(true);
-              update("concept", e.target.value);
-            }}
-            onBlur={() => touch("concept")}
-            maxLength={LIMITS.conceptMax}
-            aria-invalid={errorFor("concept") ? true : undefined}
-            aria-describedby={describedBy("concept", true)}
-            className={inputClass}
-          />
-          <FieldError field="concept" error={errorFor("concept")} />
-        </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="period" className="text-sm font-medium">
+          Periodo
+        </label>
+        <select
+          id="period"
+          name="period"
+          value={values.period}
+          onChange={(e) => changePeriod(e.target.value)}
+          aria-invalid={errorFor("period") ? true : undefined}
+          aria-describedby={describedBy("period")}
+          className={`${inputClass} bg-background`}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <FieldMessage field="period" error={errorFor("period")} hint="Mes actual a 3 meses adelante" />
       </div>
 
-      <p aria-live="polite" className="min-h-5 text-sm text-red-600">
+      <div className="flex flex-col gap-1">
+        <label htmlFor="amount" className="text-sm font-medium">
+          Monto por unidad
+        </label>
+        <input
+          id="amount"
+          name="amount"
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min={LIMITS.minAmount}
+          max={LIMITS.maxAmount}
+          value={values.amount}
+          onChange={(e) => update("amount", e.target.value)}
+          onBlur={() => touch("amount")}
+          placeholder="0.00"
+          aria-invalid={errorFor("amount") ? true : undefined}
+          aria-describedby={describedBy("amount")}
+          className={`${inputClass} tabular-nums`}
+        />
+        <FieldMessage field="amount" error={errorFor("amount")} hint="$1.00 a $5,000.00" />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="dueDate" className="text-sm font-medium">
+          Fecha de vencimiento
+        </label>
+        <input
+          id="dueDate"
+          name="dueDate"
+          type="date"
+          min={today > firstDayOfPeriod ? today : firstDayOfPeriod}
+          max={lastDayOf(values.period)}
+          value={values.dueDate}
+          onChange={(e) => update("dueDate", e.target.value)}
+          onBlur={() => touch("dueDate")}
+          aria-invalid={errorFor("dueDate") ? true : undefined}
+          aria-describedby={describedBy("dueDate")}
+          className={inputClass}
+        />
+        <FieldMessage
+          field="dueDate"
+          error={errorFor("dueDate")}
+          hint="Por defecto el día 10 del periodo"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="concept" className="text-sm font-medium">
+          Concepto
+        </label>
+        <input
+          id="concept"
+          name="concept"
+          value={values.concept}
+          onChange={(e) => {
+            setConceptEdited(true);
+            update("concept", e.target.value);
+          }}
+          onBlur={() => touch("concept")}
+          maxLength={LIMITS.conceptMax}
+          aria-invalid={errorFor("concept") ? true : undefined}
+          aria-describedby={describedBy("concept")}
+          className={inputClass}
+        />
+        <FieldMessage
+          field="concept"
+          error={errorFor("concept")}
+          hint={`Opcional, máximo ${LIMITS.conceptMax} caracteres`}
+          count={`${clean.concept.length}/${LIMITS.conceptMax}`}
+        />
+      </div>
+
+      <p aria-live="polite" className={formError ? "text-sm text-red-600" : "sr-only"}>
         {formError}
       </p>
 
@@ -259,15 +261,13 @@ export function GenerarCuotasForm({ today }: { today: string }) {
         </p>
       ) : null}
 
-      <div>
-        <button
-          type="submit"
-          disabled={hasErrors || busy}
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {checking ? "Consultando..." : pending ? "Generando..." : "Generar"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={hasErrors || busy}
+        className="w-full rounded-md bg-foreground px-4 py-2.5 font-medium text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {checking ? "Consultando..." : pending ? "Generando..." : "Generar"}
+      </button>
 
       <dialog
         ref={dialog}
@@ -300,11 +300,28 @@ export function GenerarCuotasForm({ today }: { today: string }) {
   );
 }
 
-function FieldError({ field, error }: { field: GeneracionField; error?: string }) {
-  if (!error) return null;
+function FieldMessage({
+  field,
+  error,
+  hint,
+  count,
+}: {
+  field: GeneracionField;
+  error?: string;
+  hint: string;
+  count?: string;
+}) {
+  if (error) {
+    return (
+      <p id={`${field}-error`} className="text-sm text-red-600">
+        {error}
+      </p>
+    );
+  }
   return (
-    <p id={`${field}-error`} className="text-sm text-red-600">
-      {error}
+    <p id={`${field}-hint`} className="flex justify-between gap-2 text-sm text-zinc-500">
+      <span>{hint}</span>
+      {count ? <span className="tabular-nums">{count}</span> : null}
     </p>
   );
 }
