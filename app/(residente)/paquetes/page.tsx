@@ -1,273 +1,211 @@
-'use client';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireRole } from "@/lib/api";
+import {
+  formatRecibido,
+  getMisPaquetes,
+  MIS_PAQUETES_PAGE_SIZE,
+  MIS_PAQUETES_PATH,
+  type PackageStatus,
+} from "@/lib/paquetes";
+import { Actualizar } from "./actualizar";
 
-import { useState, useEffect } from 'react';
+export const metadata: Metadata = { title: "Mis paquetes" };
 
-// Tipado estricto según el diseño técnico de H20
-type Package = {
-  id: string;
-  code: string;
-  courier: string;
-  trackingNumber: string;
-  receivedAt: string;
-  notes: string;
-  daysWaiting?: number;
-  deliveredAt?: string;
-  pickedUpByName?: string;
-  pickedUpByDocLast4?: string;
-};
-
-type PackageStatus = 'PENDIENTE_ENTREGA' | 'ENTREGADO';
-
-// Tipo de la respuesta esperada del backend de NestJS
-type ApiResponse = {
-  pendingCount: number;
-  data: Package[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-const PAGE_SIZE = 10; // Según criterio de aceptación
-
-// Consulta al backend. Solo devuelve los datos: el componente decide cómo
-// guardarlos en el estado.
-async function loadPackages(status: PackageStatus, page: number): Promise<ApiResponse> {
-  /*
-    ===============================================================
-    AQUÍ VA LA CONEXIÓN REAL A NESTJS CUANDO ESTÉ LISTO EL BACKEND
-    ===============================================================
-    const response = await fetch(`/api/v1/paquetes/mios?status=${status}&page=${page}&pageSize=${PAGE_SIZE}`);
-    if (!response.ok) throw new Error('Error al cargar paquetes');
-    return response.json();
-  */
-
-  // --- SIMULACIÓN DEL BACKEND PARA PRUEBAS FRONTEND ---
-  await new Promise(resolve => setTimeout(resolve, 600)); // Simular retraso de red
-
-  if (status === 'PENDIENTE_ENTREGA') {
-    return {
-      pendingCount: 2,
-      data: [
-        { id: '1', code: 'PQ-20261031-0014', courier: 'DHL', trackingNumber: '4581-2203', receivedAt: '31/10/2026 10:42', daysWaiting: 0, notes: 'Caja mediana' },
-        { id: '2', code: 'PQ-20261029-0009', courier: 'Amazon', trackingNumber: '—', receivedAt: '29/10/2026 15:10', daysWaiting: 2, notes: 'Sobre' },
-      ],
-      total: 2,
-      page,
-      pageSize: PAGE_SIZE,
-    };
-  }
-
-  // Simular que no hay entregados en la página 2, o devolver datos en la página 1
-  return {
-    pendingCount: 2,
-    data: page === 1
-      ? [{ id: '3', code: 'PQ-20261025-0001', courier: 'FedEx', trackingNumber: '9999-1111', receivedAt: '25/10/2026 09:00', deliveredAt: '26/10/2026 14:30', pickedUpByName: 'Ana María López', pickedUpByDocLast4: '4321', notes: 'Caja grande' }]
-      : [],
-    total: 1,
-    page,
-    pageSize: PAGE_SIZE,
-  };
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
-export default function MisPaquetesResidentePage() {
-  const [activeTab, setActiveTab] = useState<PackageStatus>('PENDIENTE_ENTREGA');
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Estados para Paginación e Indicadores
-  const [pendingCount, setPendingCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const pageSize = PAGE_SIZE;
-  // Se incrementa con "Actualizar" para volver a consultar la misma página.
-  const [reloadKey, setReloadKey] = useState(0);
+function parsePage(value: string | undefined) {
+  const page = Number.parseInt(value ?? "1", 10);
+  return Number.isInteger(page) && page >= 1 ? page : 1;
+}
 
-  // Consulta al abrir, al cambiar de pestaña o de página y al pulsar
-  // "Actualizar". El estado se actualiza en el .then (no de forma síncrona en
-  // el efecto) y `ignore` descarta respuestas viejas si el usuario cambió de
-  // pestaña antes de que llegaran.
-  useEffect(() => {
-    let ignore = false;
+function parseTab(value: string | undefined): PackageStatus {
+  return value === "ENTREGADO" ? "ENTREGADO" : "PENDIENTE_ENTREGA";
+}
 
-    loadPackages(activeTab, page)
-      .then((result) => {
-        if (ignore) return;
-        setPackages(result.data);
-        setPendingCount(result.pendingCount);
-        setTotalItems(result.total);
-      })
-      .catch((error) => {
-        console.error(error);
-        if (!ignore) setPackages([]);
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
+const thClass = "px-4 py-3 text-left text-sm font-medium";
+const tdClass = "px-4 py-3 align-top text-sm";
+const linkButtonClass =
+  "rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700";
 
-    return () => {
-      ignore = true;
-    };
-  }, [activeTab, page, reloadKey]);
+// H20: pantalla "Mis paquetes" del rol RESIDENTE. Dos pestañas (Pendientes y
+// Entregados), 10 por página, botón Actualizar.
+export default async function MisPaquetesPage(
+  props: PageProps<"/paquetes">,
+) {
+  const user = await requireRole("RESIDENTE");
+  if (!user) return null;
 
-  // Manejo de cambio de pestaña (reinicia a la página 1)
-  const handleTabChange = (tab: PackageStatus) => {
-    // Misma pestaña: no hay recarga, así que tampoco se marca isLoading.
-    if (tab === activeTab) return;
-    setIsLoading(true);
-    setActiveTab(tab);
-    setPage(1);
-  };
+  const searchParams = await props.searchParams;
+  const tab = parseTab(first(searchParams.tab));
+  const requestedPage = parsePage(first(searchParams.page));
 
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setReloadKey((k) => k + 1);
-  };
+  const lista = await getMisPaquetes(tab, requestedPage);
 
-  const goToPage = (next: number) => {
-    setIsLoading(true);
-    setPage(next);
-  };
+  const totalPages = Math.max(1, Math.ceil(lista.total / MIS_PAQUETES_PAGE_SIZE));
+  if (requestedPage > totalPages) {
+    const next = new URLSearchParams();
+    next.set("page", String(totalPages));
+    if (tab === "ENTREGADO") next.set("tab", "ENTREGADO");
+    redirect(`${MIS_PAQUETES_PATH}?${next.toString()}`);
+  }
+  const page = requestedPage;
 
-  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  function tabHref(nextTab: PackageStatus) {
+    const next = new URLSearchParams();
+    if (nextTab === "ENTREGADO") next.set("tab", "ENTREGADO");
+    const qs = next.toString();
+    return qs ? `${MIS_PAQUETES_PATH}?${qs}` : MIS_PAQUETES_PATH;
+  }
+
+  function pageHref(n: number) {
+    const next = new URLSearchParams();
+    if (n !== 1) next.set("page", String(n));
+    if (tab === "ENTREGADO") next.set("tab", "ENTREGADO");
+    const qs = next.toString();
+    return qs ? `${MIS_PAQUETES_PATH}?${qs}` : MIS_PAQUETES_PATH;
+  }
+
+  const isPending = tab === "PENDIENTE_ENTREGA";
+  const isDelivered = tab === "ENTREGADO";
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Mis paquetes</h1>
-          <p className="text-sm text-gray-500">/paquetes</p>
+          <h1 className="text-2xl font-semibold">Mis paquetes</h1>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Paquetes de tu unidad: los que están en portería esperando y los que ya recogiste.
+          </p>
         </div>
+        <Actualizar />
       </div>
 
-      {/* Pestañas y Botón Actualizar */}
-      <div className="flex justify-between items-end border-b border-gray-200 mb-6">
-        <div className="flex space-x-8">
-          <button
-            onClick={() => handleTabChange('PENDIENTE_ENTREGA')}
-            className={`pb-4 text-sm font-medium transition-colors ${
-              activeTab === 'PENDIENTE_ENTREGA' ? 'text-teal-700 border-b-2 border-teal-700' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Pendientes {pendingCount > 0 ? `(${pendingCount})` : ''}
-          </button>
-          <button
-            onClick={() => handleTabChange('ENTREGADO')}
-            className={`pb-4 text-sm font-medium transition-colors ${
-              activeTab === 'ENTREGADO' ? 'text-teal-700 border-b-2 border-teal-700' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Entregados
-          </button>
-        </div>
-        
-        {/* Botón Actualizar según Jira */}
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="mb-3 text-sm font-medium text-teal-700 hover:text-teal-800 disabled:opacity-50 transition-colors flex items-center"
-        >
-          {isLoading ? 'Actualizando...' : 'Actualizar'}
-        </button>
-      </div>
+      {/* Pestañas */}
+      <nav
+        aria-label="Estado del paquete"
+        className="flex gap-6 border-b border-zinc-200 dark:border-zinc-800"
+      >
+        <TabLink href={tabHref("PENDIENTE_ENTREGA")} active={isPending}>
+          Pendientes{lista.pendingCount > 0 ? ` (${lista.pendingCount})` : ""}
+        </TabLink>
+        <TabLink href={tabHref("ENTREGADO")} active={isDelivered}>
+          Entregados
+        </TabLink>
+      </nav>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      {lista.data.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
+          <p className="font-medium">
+            {isPending
+              ? "No tienes paquetes pendientes."
+              : "Todavía no hay paquetes entregados."}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <caption className="sr-only">
+              {isPending ? "Paquetes pendientes de entrega" : "Paquetes entregados"}, del más reciente al más antiguo
+            </caption>
+            <thead className="bg-zinc-50 dark:bg-zinc-900">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Código</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Empresa</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Guía</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Recibido</th>
-                
-                {activeTab === 'PENDIENTE_ENTREGA' ? (
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Días en portería</th>
+                <th scope="col" className={thClass}>Código</th>
+                <th scope="col" className={thClass}>Empresa</th>
+                <th scope="col" className={thClass}>Guía</th>
+                <th scope="col" className={thClass}>Recibido</th>
+                {isPending ? (
+                  <th scope="col" className={`${thClass} text-right`}>Días en portería</th>
                 ) : (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha de entrega</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Recogido por</th>
+                    <th scope="col" className={thClass}>Entregado</th>
+                    <th scope="col" className={thClass}>Recogido por</th>
                   </>
                 )}
-                
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Observaciones</th>
+                <th scope="col" className={thClass}>Observaciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {/* ESTADO 1: Cargando */}
-              {isLoading ? (
-                <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
-                    <div className="flex justify-center items-center space-x-2">
-                      <div className="w-4 h-4 rounded-full animate-pulse bg-teal-600"></div>
-                      <div className="w-4 h-4 rounded-full animate-pulse bg-teal-600 delay-75"></div>
-                      <div className="w-4 h-4 rounded-full animate-pulse bg-teal-600 delay-150"></div>
-                    </div>
-                  </td>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {lista.data.map((paquete) => (
+                <tr key={paquete.id}>
+                  <td className={`${tdClass} whitespace-nowrap font-mono`}>{paquete.code}</td>
+                  <td className={tdClass}>{paquete.courier}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{paquete.trackingNumber ?? "—"}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{formatRecibido(paquete.receivedAt)}</td>
+                  {isPending ? (
+                    <td className={`${tdClass} text-right tabular-nums`}>{paquete.daysWaiting}</td>
+                  ) : (
+                    <>
+                      <td className={`${tdClass} whitespace-nowrap`}>
+                        {paquete.deliveredAt ? formatRecibido(paquete.deliveredAt) : "—"}
+                      </td>
+                      <td className={tdClass}>
+                        {paquete.pickedUpByName ? (
+                          <>
+                            {paquete.pickedUpByName}
+                            {paquete.pickedUpByDocLast4 ? (
+                              <span className="text-zinc-500"> (***{paquete.pickedUpByDocLast4})</span>
+                            ) : null}
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </>
+                  )}
+                  <td className={`${tdClass} max-w-sm break-words`}>{paquete.notes ?? "—"}</td>
                 </tr>
-              ) : 
-              /* ESTADO 2: Vacío (Mensajes exactos de Jira) */
-              packages.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-sm text-gray-500">
-                    {activeTab === 'PENDIENTE_ENTREGA' 
-                      ? 'No tienes paquetes pendientes.' 
-                      : 'Todavía no hay paquetes entregados.'}
-                  </td>
-                </tr>
-              ) : 
-              /* ESTADO 3: Con Datos */
-              (
-                packages.map((pkg) => (
-                  <tr key={pkg.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.code}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.courier}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.trackingNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.receivedAt}</td>
-                    
-                    {activeTab === 'PENDIENTE_ENTREGA' ? (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">{pkg.daysWaiting}</td>
-                    ) : (
-                      <>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.deliveredAt}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {pkg.pickedUpByName} <span className="text-gray-500">(***{pkg.pickedUpByDocLast4})</span>
-                        </td>
-                      </>
-                    )}
-                    
-                    <td className="px-6 py-4 text-sm text-gray-900">{pkg.notes}</td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
+      )}
 
-        {/* Footer con Paginación real */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-          <span className="text-sm text-gray-500">
-            {isLoading ? 'Calculando...' : `${totalItems} paquetes · ${pageSize} por página`}
+      {lista.total > 0 ? (
+        <nav
+          aria-label="Paginación"
+          className="flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <span className="text-zinc-600 dark:text-zinc-400">
+            {lista.total} {lista.total === 1 ? "paquete" : "paquetes"} · {MIS_PAQUETES_PAGE_SIZE} por página · página {page} de {totalPages}
           </span>
-          <div className="space-x-2">
-            <button 
-              onClick={() => goToPage(Math.max(1, page - 1))}
-              disabled={page === 1 || isLoading}
-              className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Anterior
-            </button>
-            <button 
-              onClick={() => goToPage(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages || isLoading || totalItems === 0}
-              className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Siguiente
-            </button>
+          <div className="flex gap-2">
+            {page > 1 ? (
+              <Link href={pageHref(page - 1)} className={linkButtonClass}>Anterior</Link>
+            ) : (
+              <span aria-disabled="true" className={`${linkButtonClass} cursor-not-allowed opacity-50`}>Anterior</span>
+            )}
+            {page < totalPages ? (
+              <Link href={pageHref(page + 1)} className={linkButtonClass}>Siguiente</Link>
+            ) : (
+              <span aria-disabled="true" className={`${linkButtonClass} cursor-not-allowed opacity-50`}>Siguiente</span>
+            )}
           </div>
-        </div>
-      </div>
+        </nav>
+      ) : null}
     </div>
+  );
+}
+
+function TabLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  const base = "px-1 pb-3 text-sm font-medium transition-colors";
+  const classes = active
+    ? `${base} border-b-2 border-foreground text-foreground`
+    : `${base} border-b-2 border-transparent text-zinc-500 hover:text-foreground`;
+  return (
+    <Link href={href} aria-current={active ? "page" : undefined} className={classes}>
+      {children}
+    </Link>
   );
 }
