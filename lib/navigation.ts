@@ -15,7 +15,7 @@ export type NavItem = {
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
-    { href: "/incidencias/nueva", label: "Reportar incidencia" },
+    { href: "/incidencias", label: "Mis incidencias" },
   ],
   ADMINISTRADOR: [
     { href: "/", label: "Inicio" },
