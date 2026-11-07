@@ -1,10 +1,12 @@
 "use client";
 
+import { unstable_rethrow } from "next/navigation";
 import { startTransition, useActionState, useRef, useState } from "react";
 import {
   generarCuotas,
   previsualizarGeneracion,
   type GenerarCuotasState,
+  type VistaPreviaResult,
 } from "@/app/actions/cuotas";
 import {
   confirmationQuestion,
@@ -101,8 +103,16 @@ export function GenerarCuotasForm({ today }: { today: string }) {
 
     setNotice(undefined);
     setChecking(true);
-    const outcome = await previsualizarGeneracion(clean.period);
-    setChecking(false);
+    let outcome: VistaPreviaResult;
+    try {
+      outcome = await previsualizarGeneracion(clean.period);
+    } catch (error) {
+      unstable_rethrow(error);
+      setNotice(MESSAGES.previewFailed);
+      return;
+    } finally {
+      setChecking(false);
+    }
 
     if ("error" in outcome) {
       setNotice(outcome.error);

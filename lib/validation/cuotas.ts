@@ -12,6 +12,7 @@ export const MESSAGES = {
   dueDate: "La fecha de vencimiento debe estar dentro del periodo y no puede ser anterior a hoy.",
   concept: "El concepto no puede superar los 60 caracteres.",
   noActiveUnits: "No hay unidades activas para generar cuotas.",
+  previewFailed: "No se pudo consultar la vista previa. Intenta de nuevo.",
 } as const;
 
 export type GeneracionValues = {

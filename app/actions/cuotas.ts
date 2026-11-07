@@ -9,6 +9,7 @@ import {
   type FeeGenerationPreview,
 } from "@/lib/cuotas";
 import {
+  MESSAGES,
   readGeneracionValues,
   validateGeneracion,
   type GeneracionErrors,
@@ -26,7 +27,6 @@ export type GenerarCuotasState = {
 const PAGE_PATH = "/admin/cuotas/generar";
 const FIELDS: GeneracionField[] = ["period", "amount", "dueDate", "concept"];
 const FORBIDDEN = "No tienes permiso para esta acción.";
-const PREVIEW_ERROR = "No se pudo consultar la vista previa. Intenta de nuevo.";
 const GENERATE_ERROR = "No se pudieron generar las cuotas. Intenta de nuevo.";
 
 function isField(value: unknown): value is GeneracionField {
@@ -52,7 +52,7 @@ async function send(path: string, init?: RequestInit): Promise<Response | null> 
 
 export async function previsualizarGeneracion(period: string): Promise<VistaPreviaResult> {
   const res = await send(`cuotas/generaciones/vista-previa?period=${encodeURIComponent(period)}`);
-  if (!res) return { error: PREVIEW_ERROR };
+  if (!res) return { error: MESSAGES.previewFailed };
   if (res.ok) return { preview: (await res.json()) as FeeGenerationPreview };
   if (res.status === 403) return { error: FORBIDDEN };
 
@@ -60,7 +60,7 @@ export async function previsualizarGeneracion(period: string): Promise<VistaPrev
   if (res.status === 400 && message) return { error: message };
 
   console.error(`GET cuotas/generaciones/vista-previa respondió ${res.status}`);
-  return { error: PREVIEW_ERROR };
+  return { error: MESSAGES.previewFailed };
 }
 
 export async function generarCuotas(
