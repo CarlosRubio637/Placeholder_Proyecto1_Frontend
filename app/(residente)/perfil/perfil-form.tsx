@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState, type FormEvent } from "react";
 import { guardarPerfil, type GuardarState } from "@/app/actions/perfil";
 import { previewCard, VISIBILITY_OPTIONS, type DirectoryPrefs, type Perfil, type VisibilityKey } from "@/lib/perfil";
 import { sameValues, turnOn, validatePerfil, type PerfilField, type PerfilValues } from "@/lib/validation/perfil";
@@ -63,13 +63,19 @@ export function PerfilForm({ perfil }: { perfil: Perfil }) {
     edit({ directory: { ...values.directory, [key]: checked } });
   }
 
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(() => formAction(formData));
+  }
+
   const phoneError = errorFor("phone");
   const nameError = errorFor("directory.showName");
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
       <section aria-label="Mis datos" className="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
-        <form action={formAction} noValidate className="flex flex-col gap-5">
+        <form onSubmit={submit} noValidate className="flex flex-col gap-5">
           <div className="flex flex-col gap-1">
             <label htmlFor="fullName" className="text-sm font-medium">
               Nombre completo
