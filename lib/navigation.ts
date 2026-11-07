@@ -19,9 +19,15 @@ const NOTIFICACIONES: NavItem = { href: "/notificaciones", label: "Notificacione
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
-    { href: "/incidencias/nueva", label: "Reportar incidencia" },
-    NOTIFICACIONES,
+    { href: "/incidencias", label: "Mis incidencias" },
   ],
-  ADMINISTRADOR: [{ href: "/", label: "Inicio" }, NOTIFICACIONES],
-  SEGURIDAD: [{ href: "/", label: "Inicio" }, NOTIFICACIONES],
+  ADMINISTRADOR: [
+    { href: "/", label: "Inicio" },
+    { href: "/admin/areas", label: "Áreas comunes" },
+    { href: "/admin/asambleas", label: "Asambleas" },
+  ],
+  SEGURIDAD: [
+    { href: "/", label: "Inicio" },
+    { href: "/seguridad/paquetes", label: "Paquetes" },
+  ],
 };
