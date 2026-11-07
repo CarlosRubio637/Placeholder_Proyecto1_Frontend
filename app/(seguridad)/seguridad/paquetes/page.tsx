@@ -1,172 +1,154 @@
-'use client';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireRole } from "@/lib/api";
+import {
+  formatRecibido,
+  getPaquetes,
+  getTorres,
+  PAGE_SIZE,
+  PAQUETES_PATH,
+} from "@/lib/paquetes";
+import { BuscarPaquetes } from "./buscar";
+import { RegistrarPaquete } from "./registrar-paquete";
 
-import { useState } from 'react';
+export const metadata: Metadata = { title: "Paquetería" };
 
-// Tipado y datos iniciales
-type Package = {
-  id: string; code: string; unit: string; courier: string; 
-  trackingNumber: string; receivedAt: string; notes: string;
-};
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
-const initialPackages: Package[] = [
-  { id: '1', code: 'PQ-20261031-0014', unit: 'A-101', courier: 'DHL', trackingNumber: '4581-2203', receivedAt: '31/10 10:42', notes: 'Caja mediana' },
-  { id: '2', code: 'PQ-20261031-0013', unit: 'C-304', courier: 'Correos de El Salvador', trackingNumber: '—', receivedAt: '31/10 09:20', notes: '' },
-];
+function parsePage(value: string | undefined) {
+  const page = Number.parseInt(value ?? "1", 10);
+  return Number.isInteger(page) && page >= 1 ? page : 1;
+}
 
-const mockTowers = [{ id: 'A', name: 'Torre A' }, { id: 'B', name: 'Torre B' }, { id: 'C', name: 'Torre C' }];
-const unitsByTower: Record<string, { id: string; name: string }[]> = {
-  A: [{ id: 'A-101', name: 'A-101' }, { id: 'A-102', name: 'A-102' }],
-  B: [{ id: 'B-101', name: 'B-101' }, { id: 'B-202', name: 'B-202' }],
-  C: [{ id: 'C-304', name: 'C-304' }],
-};
+const thClass = "px-4 py-3 text-left text-sm font-medium";
+const tdClass = "px-4 py-3 align-top text-sm";
+const linkButtonClass =
+  "rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700";
 
-export default function PaqueteriaSeguridadPage() {
-  const [packages, setPackages] = useState<Package[]>(initialPackages);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+// H19: pantalla "Paquetería" del rol SEGURIDAD. Lista paquetes pendientes del
+// día, con búsqueda y paginación, y abre el formulario de registro.
+export default async function PaquetesPage(
+  props: PageProps<"/seguridad/paquetes">,
+) {
+  const user = await requireRole("SEGURIDAD");
+  if (!user) return null;
 
-  // Estados del modal
-  const [selectedTower, setSelectedTower] = useState('');
-  const [selectedUnit, setSelectedUnit] = useState('');
-  const [courier, setCourier] = useState('');
-  const [trackingNumber, setTrackingNumber] = useState('');
-  const [notes, setNotes] = useState('');
+  const searchParams = await props.searchParams;
+  const requestedPage = parsePage(first(searchParams.page));
+  const search = first(searchParams.search)?.trim() ?? "";
+  const aviso = first(searchParams.aviso)?.trim();
 
-  const availableUnits = selectedTower ? unitsByTower[selectedTower] || [] : [];
+  // Torres y lista de paquetes en paralelo; si falla una, el error.tsx la
+  // muestra. La lista pide por defecto solo los pendientes.
+  const [torres, lista] = await Promise.all([
+    getTorres(),
+    getPaquetes({ status: "PENDIENTE_ENTREGA", page: requestedPage, search: search || undefined }),
+  ]);
 
-  // Filtrado funcional de la tabla
-  const filteredPackages = packages.filter(pkg => 
-    pkg.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.unit.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const totalPages = Math.max(1, Math.ceil(lista.total / PAGE_SIZE));
+  if (requestedPage > totalPages) {
+    const next = new URLSearchParams();
+    next.set("page", String(totalPages));
+    if (search) next.set("search", search);
+    redirect(`${PAQUETES_PATH}?${next.toString()}`);
+  }
+  const page = requestedPage;
 
-  const handleRegisterPackage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTower || !selectedUnit || !courier) return;
-
-    const now = new Date();
-    const newPkg: Package = {
-      id: Date.now().toString(),
-      code: `PQ-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(1000 + Math.random() * 9000)}`,
-      unit: selectedUnit,
-      courier,
-      trackingNumber: trackingNumber.trim() || '—',
-      receivedAt: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
-      notes,
-    };
-
-    setPackages([newPkg, ...packages]);
-    setIsModalOpen(false);
-    setSelectedTower(''); setSelectedUnit(''); setCourier(''); setTrackingNumber(''); setNotes('');
-  };
+  function pageHref(n: number) {
+    const next = new URLSearchParams();
+    if (n !== 1) next.set("page", String(n));
+    if (search) next.set("search", search);
+    const qs = next.toString();
+    return qs ? `${PAQUETES_PATH}?${qs}` : PAQUETES_PATH;
+  }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Paquetería</h1>
-          <p className="text-sm text-gray-500">/seguridad/paquetes</p>
+          <h1 className="text-2xl font-semibold">Paquetería</h1>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Registra la llegada de los paquetes a portería para que los residentes sepan que pueden recogerlos.
+          </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 px-4 rounded transition-colors"
+        <RegistrarPaquete torres={torres} />
+      </div>
+
+      {aviso ? (
+        <p
+          role="status"
+          className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100"
         >
-          Registrar paquete
-        </button>
-      </div>
+          {aviso}
+        </p>
+      ) : null}
 
-      <div className="mb-4">
-        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-        <input
-          type="text"
-          id="search"
-          placeholder="Código, guía o unidad"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 w-full max-w-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-        />
-      </div>
+      <BuscarPaquetes defaultValue={search} />
 
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Empresa</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guía</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recibido</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observaciones</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredPackages.map((pkg) => (
-              <tr key={pkg.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pkg.code}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pkg.unit}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pkg.courier}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pkg.trackingNumber}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pkg.receivedAt}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pkg.notes}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button onClick={() => setPackages(packages.filter(p => p.id !== pkg.id))} className="bg-teal-700 hover:bg-teal-800 text-white px-3 py-1 rounded text-sm transition-colors">
-                    Entregar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-          <span className="text-sm text-gray-500">Pendientes de entrega · 20 por página</span>
-          <div className="space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50">Anterior</button>
-            <button className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100">Siguiente</button>
-          </div>
+      {lista.data.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
+          <p className="font-medium">No hay paquetes pendientes de entrega.</p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            {search
+              ? "Prueba con otra búsqueda."
+              : "Cuando registres uno, aparecerá aquí."}
+          </p>
         </div>
-      </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Registrar llegada de paquete</h2>
-            <form onSubmit={handleRegisterPackage} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Torre *</label>
-                <select value={selectedTower} onChange={(e) => { setSelectedTower(e.target.value); setSelectedUnit(''); }} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2 border">
-                  <option value="">Selecciona</option>
-                  {mockTowers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Unidad *</label>
-                <select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} disabled={!selectedTower} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2 border disabled:bg-gray-50">
-                  <option value="">{selectedTower ? 'Selecciona unidad' : 'Selecciona (Elige torre primero)'}</option>
-                  {availableUnits.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Empresa de mensajería *</label>
-                <input type="text" value={courier} onChange={(e) => setCourier(e.target.value)} required placeholder="Ej. DHL, Amazon" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2 border" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Número de guía</label>
-                <input type="text" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Opcional" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2 border" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Observaciones</label>
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Caja grande, frágil..." className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 p-2 border"></textarea>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-teal-700 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-teal-800 transition-colors">Guardar</button>
-              </div>
-            </form>
-          </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <caption className="sr-only">Pendientes de entrega, del más reciente al más antiguo</caption>
+            <thead className="bg-zinc-50 dark:bg-zinc-900">
+              <tr>
+                <th scope="col" className={thClass}>Código</th>
+                <th scope="col" className={thClass}>Unidad</th>
+                <th scope="col" className={thClass}>Empresa</th>
+                <th scope="col" className={thClass}>Guía</th>
+                <th scope="col" className={thClass}>Recibido</th>
+                <th scope="col" className={thClass}>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {lista.data.map((paquete) => (
+                <tr key={paquete.id}>
+                  <td className={`${tdClass} whitespace-nowrap font-mono`}>{paquete.code}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{paquete.unit.code}</td>
+                  <td className={tdClass}>{paquete.courier}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{paquete.trackingNumber ?? "—"}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{formatRecibido(paquete.receivedAt)}</td>
+                  <td className={`${tdClass} max-w-sm break-words`}>{paquete.notes ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
+
+      {lista.total > 0 ? (
+        <nav
+          aria-label="Paginación"
+          className="flex flex-wrap items-center justify-between gap-3 text-sm"
+        >
+          <span className="text-zinc-600 dark:text-zinc-400">
+            Pendientes de entrega · {lista.total} {lista.total === 1 ? "paquete" : "paquetes"} · {PAGE_SIZE} por página · página {page} de {totalPages}
+          </span>
+          <div className="flex gap-2">
+            {page > 1 ? (
+              <Link href={pageHref(page - 1)} className={linkButtonClass}>Anterior</Link>
+            ) : (
+              <span aria-disabled="true" className={`${linkButtonClass} cursor-not-allowed opacity-50`}>Anterior</span>
+            )}
+            {page < totalPages ? (
+              <Link href={pageHref(page + 1)} className={linkButtonClass}>Siguiente</Link>
+            ) : (
+              <span aria-disabled="true" className={`${linkButtonClass} cursor-not-allowed opacity-50`}>Siguiente</span>
+            )}
+          </div>
+        </nav>
+      ) : null}
     </div>
   );
 }
