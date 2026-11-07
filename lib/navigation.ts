@@ -20,6 +20,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   ADMINISTRADOR: [
     { href: "/", label: "Inicio" },
     { href: "/admin/areas", label: "Áreas comunes" },
+    { href: "/admin/cuotas/generar", label: "Generar cuotas" },
   ],
   SEGURIDAD: [{ href: "/", label: "Inicio" }],
 };
