@@ -12,11 +12,16 @@ export type NavItem = {
 //   - Residente:      app/(residente)/<ruta>         → /<ruta>
 //   - Administrador:  app/(admin)/admin/<ruta>       → /admin/<ruta>
 //   - Seguridad:      app/(seguridad)/seguridad/<ruta> → /seguridad/<ruta>
+// Las pantallas comunes a los tres roles (Inicio, Notificaciones) van fuera
+// de los grupos.
+const NOTIFICACIONES: NavItem = { href: "/notificaciones", label: "Notificaciones" };
+
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
     { href: "/incidencias/nueva", label: "Reportar incidencia" },
+    NOTIFICACIONES,
   ],
-  ADMINISTRADOR: [{ href: "/", label: "Inicio" }],
-  SEGURIDAD: [{ href: "/", label: "Inicio" }],
+  ADMINISTRADOR: [{ href: "/", label: "Inicio" }, NOTIFICACIONES],
+  SEGURIDAD: [{ href: "/", label: "Inicio" }, NOTIFICACIONES],
 };
