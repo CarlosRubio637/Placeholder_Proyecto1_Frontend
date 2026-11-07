@@ -47,5 +47,6 @@ export function audienceLabel(towers: Pick<Torre, "name">[] | null): string {
 }
 
 export function confirmationQuestion(count: number, label: string): string {
-  return `Se publicará para ${count} residentes de ${label}. Un comunicado publicado no se puede editar ni eliminar. ¿Publicar?`;
+  const residentes = count === 1 ? "residente" : "residentes";
+  return `Se publicará para ${count} ${residentes} de ${label}. Un comunicado publicado no se puede editar ni eliminar. ¿Publicar?`;
 }

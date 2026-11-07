@@ -48,18 +48,20 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
   const [notice, setNotice] = useState<string>();
   const [question, setQuestion] = useState<string>();
   const [confirmedValues, setConfirmedValues] = useState<ComunicadoValues>();
+  const [dismissedState, setDismissedState] = useState<PublicarState>();
   const [checking, setChecking] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
 
   const clientErrors = validateComunicado(values, today);
   const hasErrors = Object.keys(clientErrors).length > 0;
   const busy = pending || checking;
-  const formError = notice ?? (editedSinceSubmit.size === 0 ? state.formError : undefined);
+  const serverState = state === dismissedState ? initialState : state;
+  const formError = notice ?? (editedSinceSubmit.size === 0 ? serverState.formError : undefined);
 
   function errorFor(field: ComunicadoField) {
     const clientError = touched[field] ? clientErrors[field] : undefined;
     if (clientError) return clientError;
-    return editedSinceSubmit.has(field) ? undefined : state.errors?.[field];
+    return editedSinceSubmit.has(field) ? undefined : serverState.errors?.[field];
   }
 
   function touch(field: ComunicadoField) {
@@ -122,6 +124,7 @@ export function ComunicadoForm({ today, towers }: { today: string; towers: Torre
     } else {
       confirmedValues.towerIds.forEach((towerId) => formData.append("towerIds", towerId));
     }
+    setDismissedState(state);
     setEditedSinceSubmit(new Set());
     startTransition(() => formAction(formData));
   }
@@ -315,7 +318,7 @@ function FieldMessage({
 }) {
   if (error) {
     return (
-      <p id={`${field}-error`} className="text-sm text-red-600">
+      <p id={`${field}-error`} role="alert" className="text-sm text-red-600">
         {error}
       </p>
     );
