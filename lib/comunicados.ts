@@ -83,6 +83,7 @@ export type ComunicadosFiltro = {
 
 export const COMUNICADOS_PATH = "/comunicados";
 export const RESIDENT_PAGE_SIZE = 10;
+export const RESIDENT_MAX_PAGE = 100_000;
 export const NOT_FOUND_MESSAGE = "El comunicado no existe.";
 
 export const EMPTY_MESSAGES: Record<Pestana, string> = {
@@ -114,25 +115,30 @@ export function parseListParams(
     category:
       CATEGORY_OPTIONS.find((option) => option.value === category)?.value ??
       null,
-    page: Number.isInteger(page) && page >= 1 ? page : 1,
+    page:
+      Number.isSafeInteger(page) && page >= 1
+        ? Math.min(page, RESIDENT_MAX_PAGE)
+        : 1,
   };
 }
 
-export function comunicadosHref({
-  tab,
-  category,
-  page = 1,
-}: {
-  tab: Pestana;
-  category: Categoria | null;
-  page?: number;
-}): string {
+type ListLink = { tab: Pestana; category: Categoria | null; page?: number };
+
+function listQuery({ tab, category, page = 1 }: ListLink): string {
   const params = new URLSearchParams();
   if (tab !== "vigentes") params.set("tab", tab);
   if (category) params.set("category", category);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
-  return query ? `${COMUNICADOS_PATH}?${query}` : COMUNICADOS_PATH;
+  return query ? `?${query}` : "";
+}
+
+export function comunicadosHref(filtro: ListLink): string {
+  return `${COMUNICADOS_PATH}${listQuery(filtro)}`;
+}
+
+export function comunicadoHref(id: string, filtro: ListLink): string {
+  return `${COMUNICADOS_PATH}/${encodeURIComponent(id)}${listQuery(filtro)}`;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("es-SV", {

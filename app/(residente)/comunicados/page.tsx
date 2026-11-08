@@ -6,6 +6,7 @@ import {
   EMPTY_MESSAGES,
   RESIDENT_PAGE_SIZE,
   categoryLabel,
+  comunicadoHref,
   comunicadosHref,
   fechaCorta,
   parseListParams,
@@ -106,7 +107,7 @@ function ListaComunicados({
                 >
                   <td className="min-w-48 px-4 py-3 wrap-anywhere">
                     <Link
-                      href={`/comunicados/${comunicado.id}`}
+                      href={comunicadoHref(comunicado.id, filtro)}
                       prefetch={false}
                       className={`underline underline-offset-4 ${unread ? "font-semibold" : ""}`}
                     >
