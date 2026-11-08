@@ -46,19 +46,6 @@ export function ConfirmarReservaForm({ area, date, startTime, backHref }: Props)
     setStaleState(state);
   }
 
-  if (state.slotTaken) {
-    return (
-      <div className="flex flex-col gap-3">
-        <p role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
-          {RESERVA_MESSAGES.slotTaken}
-        </p>
-        <Link href={backHref} className="self-start rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background">
-          Volver a la disponibilidad
-        </Link>
-      </div>
-    );
-  }
-
   const attendeesError = errorFor("attendees");
   const rulesError = errorFor("acceptRules");
 
