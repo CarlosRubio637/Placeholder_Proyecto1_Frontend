@@ -9,7 +9,10 @@ export const PAGE_SIZE = 20;
 
 export type MorosidadResumen = {
   owedAmount: number;
+  /** Todas las morosas, tengan o no residente activo. */
   overdueUnits: number;
+  /** Morosas con residente activo: numerador del porcentaje. */
+  overdueActiveUnits: number;
   activeUnits: number;
   overduePct: number;
 };

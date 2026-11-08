@@ -115,7 +115,7 @@ export default async function MorosidadPage(props: PageProps<"/admin/reportes/mo
                 {formatPorcentaje(report.summary.overduePct)}
               </p>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                de {report.summary.activeUnits}{" "}
+                {report.summary.overdueActiveUnits} de {report.summary.activeUnits}{" "}
                 {report.summary.activeUnits === 1 ? "unidad activa" : "unidades activas"}
               </p>
             </div>
