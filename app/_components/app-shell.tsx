@@ -49,7 +49,7 @@ export function AppShell({
         <aside className="border-b border-zinc-200 p-3 md:w-56 md:border-r md:border-b-0 dark:border-zinc-800">
           <SidebarNav items={items} />
         </aside>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-6">{children}</main>
       </div>
     </div>
   );

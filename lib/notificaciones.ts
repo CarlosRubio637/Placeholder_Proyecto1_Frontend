@@ -76,6 +76,9 @@ const REFERENCE_ROUTES: Record<string, Partial<Record<Role, (id: string) => stri
   incident: {
     RESIDENTE: (id) => `/incidencias/${id}`,
   },
+  announcement: {
+    RESIDENTE: (id) => `/comunicados/${id}`,
+  },
 };
 
 export function referenceHref(

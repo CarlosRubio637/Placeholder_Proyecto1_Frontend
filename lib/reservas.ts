@@ -81,3 +81,25 @@ export function validateReserva(values: ReservaValues, capacity: number): Reserv
 export function availabilityPath(areaId: string, date?: string): string {
   return `/reservas/${areaId}${date ? `?fecha=${date}` : ""}`;
 }
+
+/** Ruta de la confirmación de una franja (H7). */
+export function confirmationPath(areaId: string, date: string, startTime: string): string {
+  return `/reservas/${areaId}/confirmar?fecha=${date}&inicio=${startTime}`;
+}
+
+export type SlotStatus = "DISPONIBLE" | "RESERVADO" | "MANTENIMIENTO" | "PASADO";
+
+/** Franja de GET /areas/:areaId/disponibilidad (H6). */
+export type AvailabilitySlot = {
+  startTime: string;
+  endTime: string;
+  status: SlotStatus;
+  ownReservationId: string | null;
+};
+
+/** "AAAA-MM-DD" más `days` días, sin depender de la zona del navegador. */
+export function addDaysIso(iso: string, days: number): string {
+  const date = new Date(`${iso}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}

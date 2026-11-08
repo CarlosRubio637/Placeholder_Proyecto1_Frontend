@@ -19,8 +19,13 @@ const NOTIFICACIONES: NavItem = { href: "/notificaciones", label: "Notificacione
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
+    { href: "/reservas", label: "Áreas comunes" },
     { href: "/incidencias", label: "Mis incidencias" },
     { href: "/paquetes", label: "Mis paquetes" },
+    { href: "/asambleas", label: "Asambleas activas" },
+    { href: "/comunicados", label: "Comunicados" },
+    { href: "/perfil", label: "Mi perfil y privacidad" },
+    NOTIFICACIONES,
   ],
   ADMINISTRADOR: [
     { href: "/", label: "Inicio" },
@@ -28,10 +33,13 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/admin/cuotas/generar", label: "Generar cuotas" },
     { href: "/admin/asambleas", label: "Asambleas" },
     { href: "/admin/reportes/morosidad", label: "Morosidad" },
+    { href: "/admin/reportes/incidencias", label: "Incidencias abiertas" },
     { href: "/admin/comunicados", label: "Comunicados" },
+    NOTIFICACIONES,
   ],
   SEGURIDAD: [
     { href: "/", label: "Inicio" },
     { href: "/seguridad/paquetes", label: "Paquetes" },
+    NOTIFICACIONES,
   ],
 };

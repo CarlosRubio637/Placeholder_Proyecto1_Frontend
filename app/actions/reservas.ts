@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import {
-  RESERVA_MESSAGES,
+  availabilityPath,
   validateReserva,
   type ReservaErrors,
   type ReservaField,
@@ -15,8 +16,6 @@ import {
 export type ReservaFormState = {
   errors?: ReservaErrors;
   formError?: string;
-  /** 409 porque otra unidad tomó la franja mientras confirmaba. */
-  slotTaken?: boolean;
   reservation?: Reservation;
 };
 
@@ -84,8 +83,8 @@ export async function reservar(
   }
   if (res.status === 409) {
     if (message === SLOT_TAKEN) {
-      revalidatePath(`/reservas/${areaId}`);
-      return { slotTaken: true, formError: RESERVA_MESSAGES.slotTaken };
+      // Regresa a la disponibilidad, que muestra el aviso y los datos al día.
+      redirect(`${availabilityPath(areaId, date)}&aviso=franja-ocupada`);
     }
     return { formError: message ?? SERVER_ERROR };
   }
