@@ -3,6 +3,7 @@ import { logout } from "@/app/actions/auth";
 import type { CurrentUser } from "@/lib/api";
 import { NAV_BY_ROLE } from "@/lib/navigation";
 import { ROLE_LABELS, isRole } from "@/lib/roles";
+import { NotificationBell } from "./notification-bell";
 import { SidebarNav } from "./sidebar-nav";
 
 // Estructura común de las pantallas con sesión: encabezado con el usuario,
@@ -24,6 +25,7 @@ export function AppShell({
           Condominio Placeholder
         </Link>
         <div className="flex items-center gap-4 text-sm">
+          <NotificationBell />
           <span>
             {user.fullName ?? user.email}
             {role ? (
