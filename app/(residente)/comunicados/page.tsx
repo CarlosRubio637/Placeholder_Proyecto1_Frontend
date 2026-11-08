@@ -108,7 +108,7 @@ function ListaComunicados({
                     unread ? "bg-sky-50 dark:bg-sky-950/40" : undefined
                   }
                 >
-                  <td className="px-4 py-3">
+                  <td className="min-w-48 px-4 py-3 wrap-anywhere">
                     <Link
                       href={`/comunicados/${comunicado.id}`}
                       prefetch={false}
