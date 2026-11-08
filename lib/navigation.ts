@@ -21,6 +21,8 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/", label: "Inicio" },
     { href: "/incidencias", label: "Mis incidencias" },
     { href: "/paquetes", label: "Mis paquetes" },
+    { href: "/asambleas", label: "Asambleas activas" },
+    NOTIFICACIONES,
   ],
   ADMINISTRADOR: [
     { href: "/", label: "Inicio" },
@@ -28,9 +30,11 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/admin/cuotas/generar", label: "Generar cuotas" },
     { href: "/admin/asambleas", label: "Asambleas" },
     { href: "/admin/comunicados", label: "Comunicados" },
+    NOTIFICACIONES,
   ],
   SEGURIDAD: [
     { href: "/", label: "Inicio" },
     { href: "/seguridad/paquetes", label: "Paquetes" },
+    NOTIFICACIONES,
   ],
 };
