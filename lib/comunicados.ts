@@ -1,3 +1,4 @@
+import { SV_TIME_ZONE } from "@/lib/fechas";
 import type { Torre } from "@/lib/paquetes";
 
 export type Categoria = "CORTE_SERVICIO" | "MANTENIMIENTO" | "AVISO_GENERAL";
@@ -49,4 +50,115 @@ export function audienceLabel(towers: Pick<Torre, "name">[] | null): string {
 export function confirmationQuestion(count: number, label: string): string {
   const residentes = count === 1 ? "residente" : "residentes";
   return `Se publicará para ${count} ${residentes} de ${label}. Un comunicado publicado no se puede editar ni eliminar. ¿Publicar?`;
+}
+
+export type Pestana = "vigentes" | "archivados";
+
+export type ComunicadoResumen = {
+  id: string;
+  title: string;
+  category: Categoria;
+  publishedAt: string;
+  expiresOn: string;
+  readAt: string | null;
+};
+
+export type ComunicadoDetalle = Omit<ComunicadoResumen, "readAt"> & {
+  body: string;
+  readAt: string;
+};
+
+export type ComunicadosPagina = {
+  data: ComunicadoResumen[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type ComunicadosFiltro = {
+  tab: Pestana;
+  category: Categoria | null;
+  page: number;
+};
+
+export const COMUNICADOS_PATH = "/comunicados";
+export const RESIDENT_PAGE_SIZE = 10;
+export const NOT_FOUND_MESSAGE = "El comunicado no existe.";
+
+export const EMPTY_MESSAGES: Record<Pestana, string> = {
+  vigentes: "No tienes comunicados vigentes.",
+  archivados: "No hay comunicados archivados.",
+};
+
+const PESTANAS: Pestana[] = ["vigentes", "archivados"];
+
+export function categoryLabel(category: Categoria): string {
+  return (
+    CATEGORY_OPTIONS.find((option) => option.value === category)?.label ??
+    category
+  );
+}
+
+function first(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export function parseListParams(
+  searchParams: Record<string, string | string[] | undefined>,
+): ComunicadosFiltro {
+  const tab = first(searchParams.tab);
+  const category = first(searchParams.category);
+  const page = Number(first(searchParams.page) ?? "1");
+  return {
+    tab: PESTANAS.find((option) => option === tab) ?? "vigentes",
+    category:
+      CATEGORY_OPTIONS.find((option) => option.value === category)?.value ??
+      null,
+    page: Number.isInteger(page) && page >= 1 ? page : 1,
+  };
+}
+
+export function comunicadosHref({
+  tab,
+  category,
+  page = 1,
+}: {
+  tab: Pestana;
+  category: Categoria | null;
+  page?: number;
+}): string {
+  const params = new URLSearchParams();
+  if (tab !== "vigentes") params.set("tab", tab);
+  if (category) params.set("category", category);
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query ? `${COMUNICADOS_PATH}?${query}` : COMUNICADOS_PATH;
+}
+
+const dateFormatter = new Intl.DateTimeFormat("es-SV", {
+  timeZone: SV_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+const timeFormatter = new Intl.DateTimeFormat("es-SV", {
+  timeZone: SV_TIME_ZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+});
+
+export function fechaCorta(iso: string): string {
+  return dateFormatter.format(new Date(iso));
+}
+
+export function fechaVigencia(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+export function lecturaText(iso: string): string {
+  const moment = new Date(iso);
+  return `Leído el ${dateFormatter.format(moment)} a las ${timeFormatter.format(moment)}`;
 }
