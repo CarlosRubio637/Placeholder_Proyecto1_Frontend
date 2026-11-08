@@ -43,11 +43,7 @@ export default async function ComunicadosPage(
     <div className="flex max-w-5xl flex-col gap-6">
       <h1 className="text-2xl font-semibold">Comunicados</h1>
 
-      <FiltrosComunicados
-        key={`${filtro.tab}|${filtro.category ?? ""}`}
-        tab={filtro.tab}
-        category={filtro.category}
-      />
+      <FiltrosComunicados tab={filtro.tab} category={filtro.category} />
 
       {!result.ok ? (
         <p

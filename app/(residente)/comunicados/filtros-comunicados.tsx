@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import {
   CATEGORY_OPTIONS,
   comunicadosHref,
@@ -17,27 +17,25 @@ const TABS: { value: Pestana; label: string }[] = [
 const controlClass =
   "rounded-md border border-zinc-300 bg-background px-3 py-2 text-sm disabled:opacity-60 dark:border-zinc-700";
 
-export function FiltrosComunicados({
-  tab,
-  category,
-}: {
-  tab: Pestana;
-  category: Categoria | null;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+type Filtro = { tab: Pestana; category: Categoria | null };
 
-  function go(next: { tab: Pestana; category: Categoria | null }) {
-    startTransition(() => router.push(comunicadosHref(next)));
+export function FiltrosComunicados({ tab, category }: Filtro) {
+  const router = useRouter();
+  const [filtering, startFilter] = useTransition();
+  const [refreshing, startRefresh] = useTransition();
+  const [shown, setShown] = useOptimistic<Filtro>({ tab, category });
+
+  function go(next: Filtro) {
+    startFilter(() => {
+      setShown(next);
+      router.push(comunicadosHref(next));
+    });
   }
 
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex flex-wrap items-end gap-4">
-        <fieldset
-          disabled={pending}
-          className="flex min-w-0 gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900"
-        >
+      <div aria-busy={filtering} className="flex flex-wrap items-end gap-4">
+        <fieldset className="flex min-w-0 gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900">
           <legend className="sr-only">Pestaña</legend>
           {TABS.map((option) => (
             <label
@@ -48,8 +46,10 @@ export function FiltrosComunicados({
                 type="radio"
                 name="tab"
                 value={option.value}
-                checked={tab === option.value}
-                onChange={() => go({ tab: option.value, category })}
+                checked={shown.tab === option.value}
+                onChange={() =>
+                  go({ tab: option.value, category: shown.category })
+                }
                 className="sr-only"
               />
               {option.label}
@@ -63,12 +63,11 @@ export function FiltrosComunicados({
           </label>
           <select
             id="category"
-            value={category ?? ""}
-            disabled={pending}
+            value={shown.category ?? ""}
             onChange={(event) => {
               const value = event.target.value;
               go({
-                tab,
+                tab: shown.tab,
                 category:
                   CATEGORY_OPTIONS.find((option) => option.value === value)
                     ?.value ?? null,
@@ -88,11 +87,11 @@ export function FiltrosComunicados({
 
       <button
         type="button"
-        onClick={() => startTransition(() => router.refresh())}
-        disabled={pending}
+        onClick={() => startRefresh(() => router.refresh())}
+        disabled={refreshing}
         className={`${controlClass} font-medium`}
       >
-        {pending ? "Actualizando..." : "Actualizar"}
+        {refreshing ? "Actualizando..." : "Actualizar"}
       </button>
     </div>
   );
