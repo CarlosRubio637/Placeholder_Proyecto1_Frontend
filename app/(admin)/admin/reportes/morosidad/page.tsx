@@ -61,15 +61,14 @@ export default async function MorosidadPage(props: PageProps<"/admin/reportes/mo
   const hasta = isIsoDate(hastaParam) ? hastaParam : defaults.hasta;
   const page = parsePage(first(searchParams.page));
 
-  // Rango inválido escrito a mano en la URL: se avisa sin consultar.
+  // Rango inválido escrito a mano en la URL: no se consulta. El mensaje lo
+  // muestra el formulario bajo "Hasta" (recibe las mismas fechas).
   const rangoError = validateRango(desde, hasta);
   const result = rangoError ? null : await getMorosidad(desde, hasta, page);
 
   let report: MorosidadReporte | null = null;
   let mensaje: React.ReactNode = null;
-  if (rangoError) {
-    mensaje = <Mensaje alert>{rangoError.message}</Mensaje>;
-  } else if (result && !result.ok) {
+  if (result && !result.ok) {
     mensaje =
       result.error === "forbidden" ? (
         <Mensaje alert>No tienes permiso para ver esta página.</Mensaje>
