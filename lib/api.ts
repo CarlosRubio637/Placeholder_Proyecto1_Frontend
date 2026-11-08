@@ -78,3 +78,9 @@ export async function requireRole(role: Role): Promise<CurrentUser | null> {
   const user = await getCurrentUser();
   return user.role === role ? user : null;
 }
+
+// Igual que requireRole, para las páginas que comparten varios roles (H6).
+export async function requireAnyRole(roles: Role[]): Promise<CurrentUser | null> {
+  const user = await getCurrentUser();
+  return roles.includes(user.role) ? user : null;
+}
