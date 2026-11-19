@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getDirectorio } from "@/lib/directorio-api";
-import type { DirectorioPagina, Vecino } from "@/lib/directorio";
+import {
+  parseDirectorioParams,
+  type DirectorioPagina,
+  type Vecino,
+} from "@/lib/directorio";
 import { BuscarVecinos } from "./buscar-vecinos";
 import { ResultadosDirectorio } from "./resultados-directorio";
 
@@ -65,6 +69,34 @@ describe("H29. Búsqueda de contacto de vecinos", () => {
     expect(
       screen.getByText("Escribe al menos 3 caracteres del nombre."),
     ).toBeTruthy();
+    expect(buscar().disabled).toBe(true);
+  });
+
+  it('AC1: "^^^" no cuenta como 3 letras y deshabilita Buscar', () => {
+    render(<BuscarVecinos torres={TORRES} busqueda={null} />);
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Nombre" }), {
+      target: { value: "^^^" },
+    });
+
+    expect(
+      screen.getByText("Escribe al menos 3 caracteres del nombre."),
+    ).toBeTruthy();
+    expect(buscar().disabled).toBe(true);
+  });
+
+  it("AC1: con el número de unidad pero sin torre pide la torre", () => {
+    render(<BuscarVecinos torres={TORRES} busqueda={null} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Unidad" }));
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Número de unidad" }),
+      {
+        target: { value: "101" },
+      },
+    );
+
+    expect(screen.getByText("Selecciona la torre.")).toBeTruthy();
     expect(buscar().disabled).toBe(true);
   });
 
@@ -156,5 +188,15 @@ describe("H29. Búsqueda de contacto de vecinos", () => {
     expect(
       screen.getByText("Busca a un vecino por su nombre o su unidad."),
     ).toBeTruthy();
+  });
+
+  it("lee la búsqueda de la URL: el primer valor, solo páginas enteras y hasta 100,000", () => {
+    expect(
+      parseDirectorioParams({ name: ["gomez", "diaz"], page: "0x10" }),
+    ).toEqual({ busqueda: { mode: "nombre", name: "gomez" }, page: 1 });
+    expect(parseDirectorioParams({ name: "gomez", page: "100001" }).page).toBe(
+      100000,
+    );
+    expect(parseDirectorioParams({ name: "^^^" }).busqueda).toBeNull();
   });
 });

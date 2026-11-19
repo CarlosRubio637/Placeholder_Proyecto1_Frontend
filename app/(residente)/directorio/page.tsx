@@ -19,11 +19,16 @@ export default async function DirectorioPage(props: PageProps<"/directorio">) {
   const user = await requireRole("RESIDENTE");
   if (!user) return null;
 
-  const { busqueda, page } = parseDirectorioParams(await props.searchParams);
-  const [torres, result] = await Promise.all([
-    getTorres(),
-    busqueda ? getDirectorio(busqueda, page) : null,
-  ]);
+  const parsed = parseDirectorioParams(await props.searchParams);
+  const torres = await getTorres();
+  const pedida = parsed.busqueda;
+  const busqueda =
+    pedida?.mode === "unidad" &&
+    !torres.some((torre) => torre.id === pedida.towerId)
+      ? null
+      : pedida;
+  const page = parsed.page;
+  const result = busqueda ? await getDirectorio(busqueda, page) : null;
 
   if (busqueda && result?.ok) {
     const lastPage = lastPageOf(result.pagina.total);

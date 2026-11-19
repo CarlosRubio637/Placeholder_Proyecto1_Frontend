@@ -33,7 +33,7 @@ export function BuscarVecinos({
   const [searching, startSearch] = useTransition();
   const [form, setForm] = useState<BusquedaForm>(() => formFrom(busqueda));
   const errors = busquedaErrors(form);
-  const next = busquedaFrom(form);
+  const busquedaValida = busquedaFrom(form);
 
   function update(change: Partial<BusquedaForm>) {
     setForm((current) => ({ ...current, ...change }));
@@ -41,9 +41,9 @@ export function BuscarVecinos({
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!next) return;
+    if (!busquedaValida) return;
     startSearch(() => {
-      router.push(directorioHref(next));
+      router.push(directorioHref(busquedaValida));
     });
   }
 
@@ -102,6 +102,10 @@ export function BuscarVecinos({
               id="directorio-torre"
               value={form.towerId}
               onChange={(event) => update({ towerId: event.target.value })}
+              aria-invalid={errors.towerId ? true : undefined}
+              aria-describedby={
+                errors.towerId ? "directorio-torre-error" : undefined
+              }
               className={inputClass}
             >
               <option value="">Selecciona</option>
@@ -111,6 +115,11 @@ export function BuscarVecinos({
                 </option>
               ))}
             </select>
+            {errors.towerId ? (
+              <p id="directorio-torre-error" className={errorClass}>
+                {errors.towerId}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="directorio-unidad" className="text-sm font-medium">
@@ -142,7 +151,7 @@ export function BuscarVecinos({
       <div>
         <button
           type="submit"
-          disabled={!next || searching}
+          disabled={!busquedaValida || searching}
           className="rounded-md bg-foreground px-4 py-2 font-medium text-background disabled:opacity-50"
         >
           {searching ? "Buscando..." : "Buscar"}

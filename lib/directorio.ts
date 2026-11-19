@@ -23,7 +23,11 @@ export type BusquedaForm = {
   unitNumber: string;
 };
 
-export type BusquedaErrors = { name?: string; unitNumber?: string };
+export type BusquedaErrors = {
+  name?: string;
+  towerId?: string;
+  unitNumber?: string;
+};
 
 export const DIRECTORIO_PATH = "/directorio";
 export const DIRECTORIO_PAGE_SIZE = 20;
@@ -32,7 +36,8 @@ export const NAME_MIN = 3;
 export const NAME_MAX = 80;
 
 export const DIRECTORIO_MESSAGES = {
-  nameShort: "Escribe al menos 3 caracteres del nombre.",
+  nameShort: `Escribe al menos ${NAME_MIN} caracteres del nombre.`,
+  towerId: "Selecciona la torre.",
   unitNumber: "Ingresa el número de unidad de 3 dígitos.",
   initial: "Busca a un vecino por su nombre o su unidad.",
   empty: "No se encontraron residentes que coincidan con la búsqueda.",
@@ -40,23 +45,40 @@ export const DIRECTORIO_MESSAGES = {
 
 const UNIT_NUMBER = /^\d{3}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DIGITS = /^\d+$/;
+const DIACRITICS = new RegExp(String.raw`\p{Diacritic}`, "gu");
+
+export function searchName(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(DIACRITICS, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export function busquedaErrors(form: BusquedaForm): BusquedaErrors {
   if (form.mode === "nombre") {
-    const length = form.name.trim().length;
-    return length > 0 && length < NAME_MIN
+    const typed = form.name.trim() !== "";
+    return typed && searchName(form.name).length < NAME_MIN
       ? { name: DIRECTORIO_MESSAGES.nameShort }
       : {};
   }
-  return form.unitNumber !== "" && !UNIT_NUMBER.test(form.unitNumber)
-    ? { unitNumber: DIRECTORIO_MESSAGES.unitNumber }
-    : {};
+  const typedUnit = form.unitNumber !== "";
+  return {
+    ...(typedUnit &&
+      form.towerId === "" && { towerId: DIRECTORIO_MESSAGES.towerId }),
+    ...(typedUnit &&
+      !UNIT_NUMBER.test(form.unitNumber) && {
+        unitNumber: DIRECTORIO_MESSAGES.unitNumber,
+      }),
+  };
 }
 
 export function busquedaFrom(form: BusquedaForm): Busqueda | null {
   if (form.mode === "nombre") {
     const name = form.name.trim();
-    return name.length >= NAME_MIN && name.length <= NAME_MAX
+    return searchName(name).length >= NAME_MIN && name.length <= NAME_MAX
       ? { mode: "nombre", name }
       : null;
   }
@@ -80,8 +102,9 @@ function firstParam(value: string | string[] | undefined): string {
 }
 
 function parsePage(value: string): number {
-  const page = Number(value || "1");
-  return Number.isSafeInteger(page) && page >= 1 ? Math.min(page, MAX_PAGE) : 1;
+  if (!DIGITS.test(value)) return 1;
+  const page = Number(value);
+  return page >= 1 ? Math.min(page, MAX_PAGE) : 1;
 }
 
 export function parseDirectorioParams(

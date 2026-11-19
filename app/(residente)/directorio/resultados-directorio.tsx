@@ -21,10 +21,18 @@ export function ResultadosDirectorio({
   page: number;
 }) {
   if (!pagina || !busqueda) {
-    return <p className={noticeClass}>{DIRECTORIO_MESSAGES.initial}</p>;
+    return (
+      <p role="status" className={noticeClass}>
+        {DIRECTORIO_MESSAGES.initial}
+      </p>
+    );
   }
   if (pagina.data.length === 0) {
-    return <p className={noticeClass}>{DIRECTORIO_MESSAGES.empty}</p>;
+    return (
+      <p role="status" className={noticeClass}>
+        {DIRECTORIO_MESSAGES.empty}
+      </p>
+    );
   }
 
   const lastPage = lastPageOf(pagina.total);
@@ -48,7 +56,7 @@ export function ResultadosDirectorio({
         aria-label="Paginación"
         className="flex flex-wrap items-center justify-between gap-3 text-sm"
       >
-        <span className="text-zinc-600 dark:text-zinc-400">
+        <span role="status" className="text-zinc-600 dark:text-zinc-400">
           {`${pagina.total} ${residentes}, página ${page} de ${lastPage}`}
         </span>
         <div className="flex gap-2">
