@@ -1,7 +1,12 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLecturas } from "@/lib/comunicados-api";
-import type { AdminFiltro, LecturasPagina } from "@/lib/comunicados-admin";
+import {
+  adminComunicadosHref,
+  parseReadsParams,
+  type AdminFiltro,
+  type LecturasPagina,
+} from "@/lib/comunicados-admin";
 import { FiltroLectura } from "./filtro-lectura";
 import { TablaDestinatarios } from "./tabla-destinatarios";
 
@@ -134,21 +139,55 @@ describe("H26. Comunicados publicados y control de lecturas", () => {
     expect(screen.queryByRole("table")).toBeNull();
   });
 
-  it.each([
-    [true, "Nadie ha leído este comunicado todavía."],
-    [null, "Este comunicado no tuvo destinatarios."],
-  ])(
-    "con read=%s y sin resultados muestra su propio mensaje",
-    (read, message) => {
+  it("con Leído y sin resultados dice que nadie lo ha leído todavía", () => {
+    render(
+      <TablaDestinatarios
+        id={ID}
+        lecturas={lecturas({ data: [], total: 0 })}
+        filtro={{ read: true, page: 1 }}
+        lista={lista}
+      />,
+    );
+    expect(
+      screen.getByText("Nadie ha leído este comunicado todavía."),
+    ).toBeTruthy();
+  });
+
+  it.each([null, true, false])(
+    "sin destinatarios y con read=%s dice que no tuvo destinatarios",
+    (read) => {
+      const sinDestinatarios = lecturas({ data: [], total: 0 });
+      sinDestinatarios.announcement = {
+        ...sinDestinatarios.announcement,
+        readCount: 0,
+        recipientCount: 0,
+        readPct: 0,
+      };
       render(
         <TablaDestinatarios
           id={ID}
-          lecturas={lecturas({ data: [], total: 0 })}
+          lecturas={sinDestinatarios}
           filtro={{ read, page: 1 }}
           lista={lista}
         />,
       );
-      expect(screen.getByText(message)).toBeTruthy();
+      expect(
+        screen.getByText("Este comunicado no tuvo destinatarios."),
+      ).toBeTruthy();
     },
   );
+
+  it("volver a la lista recupera sus filtros desde la URL del detalle", () => {
+    const { filtro, lista: desdeUrl } = parseReadsParams({
+      read: "false",
+      page: "2",
+      status: "ARCHIVADO",
+      category: ["MANTENIMIENTO", "AVISO_GENERAL"],
+      listPage: "3",
+    });
+    expect(filtro).toEqual({ read: false, page: 2 });
+    expect(adminComunicadosHref(desdeUrl)).toBe(
+      "/admin/comunicados?status=ARCHIVADO&category=MANTENIMIENTO&page=3",
+    );
+  });
 });

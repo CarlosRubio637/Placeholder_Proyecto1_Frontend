@@ -84,8 +84,12 @@ const READ_VALUES = new Map<string, boolean>([
 export const LIST_EMPTY = "Todavía no hay comunicados publicados.";
 export const LIST_EMPTY_FILTERED = "No hay comunicados con estos filtros.";
 
-export function readersEmptyMessage(read: boolean | null): string {
-  if (read === null) return "Este comunicado no tuvo destinatarios.";
+export function readersEmptyMessage(
+  read: boolean | null,
+  recipientCount: number,
+): string {
+  if (read === null || recipientCount === 0)
+    return "Este comunicado no tuvo destinatarios.";
   return read
     ? "Nadie ha leído este comunicado todavía."
     : "Todos los destinatarios ya leyeron este comunicado.";

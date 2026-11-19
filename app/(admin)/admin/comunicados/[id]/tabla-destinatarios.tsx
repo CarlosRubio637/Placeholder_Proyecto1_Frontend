@@ -25,15 +25,21 @@ export function TablaDestinatarios({
   if (lecturas.data.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-10 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-        {readersEmptyMessage(filtro.read)}
+        {readersEmptyMessage(filtro.read, lecturas.announcement.recipientCount)}
       </p>
     );
   }
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+      <div
+        role="region"
+        aria-label="Destinatarios del comunicado"
+        tabIndex={0}
+        className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800"
+      >
         <table className="min-w-full text-sm">
+          <caption className="sr-only">Destinatarios del comunicado</caption>
           <thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900">
             <tr>
               {HEADERS.map((header) => (

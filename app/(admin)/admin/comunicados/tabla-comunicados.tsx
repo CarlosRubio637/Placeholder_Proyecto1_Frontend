@@ -50,8 +50,14 @@ export function TablaComunicados({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+      <div
+        role="region"
+        aria-label="Comunicados publicados"
+        tabIndex={0}
+        className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800"
+      >
         <table className="min-w-full text-sm">
+          <caption className="sr-only">Comunicados publicados</caption>
           <thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900">
             <tr>
               {HEADERS.map((header) => (
