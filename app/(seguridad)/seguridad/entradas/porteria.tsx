@@ -60,7 +60,7 @@ export function Porteria({ torres, initialSolicitudes }: Props) {
           </h2>
           <SolicitudForm torres={torres} onSent={onSuccess} />
         </div>
-        <BuscarAutorizacion onEntry={onSuccess} />
+        <BuscarAutorizacion onEntry={onSuccess} onSearch={() => setAviso(undefined)} />
       </section>
 
       <section aria-labelledby="solicitudes-titulo" className="flex flex-col gap-3">

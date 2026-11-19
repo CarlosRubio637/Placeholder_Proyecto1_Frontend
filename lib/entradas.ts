@@ -1,9 +1,6 @@
-import type { Unidad } from "@/lib/paquetes";
-
 // Tipos y formatos de la portería (H16). Sin dependencias del servidor: los
 // usan los componentes de cliente. Las consultas están en lib/entradas-api.ts.
 
-export const ENTRADAS_PATH = "/seguridad/entradas";
 /** La lista "Esperando respuesta" se actualiza cada 15 segundos. */
 export const SOLICITUDES_POLL_MS = 15_000;
 
@@ -46,9 +43,6 @@ export type Solicitud = VisitaPorteria & {
   createdAt: string;
   expiresAt: string | null;
 };
-
-/** Unidad con sus residentes activos: a una unidad sin residentes no se le puede pedir. */
-export type UnidadDestino = Unidad & { residentCount: number };
 
 // ----------------- Formato -----------------
 

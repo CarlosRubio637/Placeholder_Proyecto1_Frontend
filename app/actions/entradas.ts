@@ -1,8 +1,9 @@
 "use server";
 
+import { unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { formatHora, type Solicitud, type UnidadDestino, type VisitaPorteria } from "@/lib/entradas";
-import { buscarVisitas, getSolicitudes, getUnidadesDestino } from "@/lib/entradas-api";
+import { formatHora, type Solicitud, type VisitaPorteria } from "@/lib/entradas";
+import { buscarVisitas, getSolicitudes } from "@/lib/entradas-api";
 import {
   FIELD_PATH_REGEX,
   MESSAGES,
@@ -43,6 +44,8 @@ export async function buscarVisita(raw: unknown): Promise<BuscarState> {
   try {
     res = await buscarVisitas(cleanSearch(q));
   } catch (error) {
+    // Un 401 redirige dentro de apiFetch (sesión expirada): deja pasar esa redirección.
+    unstable_rethrow(error);
     console.error("Error al buscar la visita:", error);
     return { error: SERVER_ERROR };
   }
@@ -68,6 +71,8 @@ export async function registrarEntrada(id: unknown): Promise<EntradaState> {
   try {
     res = await apiFetch(`seguridad/visitas/${id}/entrada`, { method: "POST" });
   } catch (error) {
+    // Un 401 redirige dentro de apiFetch (sesión expirada): deja pasar esa redirección.
+    unstable_rethrow(error);
     console.error("Error al registrar la entrada:", error);
     return { error: SERVER_ERROR };
   }
@@ -90,6 +95,8 @@ export async function listarSolicitudes(): Promise<SolicitudesState> {
   try {
     return { data: await getSolicitudes() };
   } catch (error) {
+    // Un 401 redirige dentro de apiFetch (sesión expirada): deja pasar esa redirección.
+    unstable_rethrow(error);
     console.error("Error al cargar las solicitudes:", error);
     return { error: "No se pudieron cargar las solicitudes." };
   }
@@ -139,6 +146,8 @@ export async function enviarSolicitud(
       }),
     });
   } catch (error) {
+    // Un 401 redirige dentro de apiFetch (sesión expirada): deja pasar esa redirección.
+    unstable_rethrow(error);
     console.error("Error al enviar la solicitud:", error);
     return { formError: "No se pudo enviar la solicitud. Intenta más tarde." };
   }
@@ -166,17 +175,4 @@ export async function enviarSolicitud(
     return { formError: message ?? SERVER_ERROR };
   }
   return { formError: commonError(res.status) };
-}
-
-export type UnidadesDestinoState = { data?: UnidadDestino[]; error?: string };
-
-// El formulario la llama al elegir torre; así el cliente no maneja el token.
-export async function listarUnidadesDestino(towerId: unknown): Promise<UnidadesDestinoState> {
-  if (typeof towerId !== "string" || !UUID_REGEX.test(towerId)) return { data: [] };
-  try {
-    return { data: await getUnidadesDestino(towerId) };
-  } catch (error) {
-    console.error("Error al cargar las unidades:", error);
-    return { error: "No se pudieron cargar las unidades." };
-  }
 }

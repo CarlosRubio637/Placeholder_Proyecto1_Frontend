@@ -3,7 +3,7 @@
 // y motivo usan los mismos mensajes y límites de H14.
 // Sin dependencias del servidor: las usan los componentes y las Server Functions.
 
-import { LIMITS, MESSAGES as VISIT_MESSAGES, cleanName } from "@/lib/validation/visita";
+import { MESSAGES as VISIT_MESSAGES, cleanName, validateVisitante } from "@/lib/validation/visita";
 
 export const MESSAGES = {
   ...VISIT_MESSAGES,
@@ -17,9 +17,6 @@ export const MESSAGES = {
 } as const;
 
 const SEARCH_REGEX = /^[A-Z0-9-]{6,12}$/;
-const DUI_REGEX = /^\d{8}-\d$/;
-const PASSPORT_REGEX = /^[A-Za-z0-9]{6,12}$/;
-const NAME_REGEX = /^[\p{L} ]+$/u;
 
 /** Búsqueda como la normaliza el backend: sin espacios y en mayúsculas. */
 export function cleanSearch(value: string): string {
@@ -58,26 +55,8 @@ export function cleanSolicitud(values: SolicitudValues): SolicitudValues {
 
 /** Errores por campo de valores ya limpios (cleanSolicitud). Vacío si todo es válido. */
 export function validateSolicitud(values: SolicitudValues): SolicitudErrors {
-  const errors: SolicitudErrors = {};
-  const { length } = values.visitorName;
-  if (length < LIMITS.nameMin || length > LIMITS.nameMax || !NAME_REGEX.test(values.visitorName)) {
-    errors.visitorName = MESSAGES.name;
-  }
-
-  if (values.documentType === "DUI") {
-    if (!DUI_REGEX.test(values.documentNumber)) errors.documentNumber = MESSAGES.dui;
-  } else if (values.documentType === "PASAPORTE") {
-    if (!PASSPORT_REGEX.test(values.documentNumber)) errors.documentNumber = MESSAGES.passport;
-  } else {
-    errors.documentType = MESSAGES.documentType;
-  }
-
+  const errors: SolicitudErrors = validateVisitante(values);
   if (!values.towerId) errors.towerId = MESSAGES.tower;
   if (!values.unitId) errors.unitId = MESSAGES.unit;
-
-  const reasonLength = values.reason.length;
-  if (reasonLength < LIMITS.reasonMin || reasonLength > LIMITS.reasonMax) {
-    errors.reason = MESSAGES.reason;
-  }
   return errors;
 }

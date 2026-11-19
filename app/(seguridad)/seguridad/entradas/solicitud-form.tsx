@@ -1,13 +1,9 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
-import {
-  enviarSolicitud,
-  listarUnidadesDestino,
-  type EnviarSolicitudState,
-} from "@/app/actions/entradas";
-import type { UnidadDestino } from "@/lib/entradas";
-import type { Torre } from "@/lib/paquetes";
+import { enviarSolicitud, type EnviarSolicitudState } from "@/app/actions/entradas";
+import { listarUnidades } from "@/app/actions/paquetes";
+import type { Torre, Unidad } from "@/lib/paquetes";
 import {
   cleanSolicitud,
   validateSolicitud,
@@ -42,7 +38,7 @@ export function SolicitudForm({ torres, onSent }: Props) {
   const [draft, setDraft] = useState<SolicitudValues>(empty);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [dirty, setDirty] = useState(false);
-  const [unidades, setUnidades] = useState<UnidadDestino[]>([]);
+  const [unidades, setUnidades] = useState<Unidad[]>([]);
   const [loadingUnidades, setLoadingUnidades] = useState(false);
   const [unidadesError, setUnidadesError] = useState<string | undefined>();
 
@@ -70,7 +66,8 @@ export function SolicitudForm({ torres, onSent }: Props) {
   function open() {
     setDraft(empty);
     setTouched({});
-    setDirty(false);
+    // true: oculta los errores del envío anterior hasta el próximo envío.
+    setDirty(true);
     setUnidades([]);
     setUnidadesError(undefined);
     dialog.current?.showModal();
@@ -91,7 +88,7 @@ export function SolicitudForm({ torres, onSent }: Props) {
     setUnidadesError(undefined);
     if (!towerId) return;
     setLoadingUnidades(true);
-    const res = await listarUnidadesDestino(towerId);
+    const res = await listarUnidades(towerId);
     setLoadingUnidades(false);
     if (res.error) setUnidadesError(res.error);
     else setUnidades(res.data ?? []);

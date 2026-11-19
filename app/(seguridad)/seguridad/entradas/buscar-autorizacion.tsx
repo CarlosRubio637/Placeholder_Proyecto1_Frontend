@@ -16,11 +16,15 @@ import { RegistrarEntradaButton } from "./registrar-entrada-button";
 const inputClass =
   "w-full max-w-sm rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
-type Props = { onEntry: (message: string) => void };
+type Props = {
+  onEntry: (message: string) => void;
+  /** Al buscar otra vez, la pantalla quita el aviso de la entrada anterior. */
+  onSearch: () => void;
+};
 
 // Busca una autorización de hoy por código o documento y muestra cada
 // resultado con su estado; si está Autorizada y vigente, el botón de entrada.
-export function BuscarAutorizacion({ onEntry }: Props) {
+export function BuscarAutorizacion({ onEntry, onSearch }: Props) {
   const [query, setQuery] = useState("");
   const [touched, setTouched] = useState(false);
   const [pending, setPending] = useState(false);
@@ -34,6 +38,7 @@ export function BuscarAutorizacion({ onEntry }: Props) {
     event.preventDefault();
     setTouched(true);
     if (invalid || pending) return;
+    onSearch();
     setPending(true);
     const res = await buscarVisita(query);
     setPending(false);
