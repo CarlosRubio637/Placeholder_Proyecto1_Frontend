@@ -6,6 +6,7 @@ import { describeEvent, formatDateTime, locationLabel } from "@/lib/incidencias"
 import { PriorityBadge, StatusBadge } from "@/app/_components/incidencias/badges";
 import { PhotoGallery } from "@/app/_components/incidencias/photo-gallery";
 import { RefreshButton } from "@/app/_components/incidencias/refresh-button";
+import { EstadoPanel } from "./estado-panel";
 import { GestionPanel } from "./gestion-panel";
 
 export const metadata: Metadata = {
@@ -16,7 +17,8 @@ const NUMBER_REGEX = /^INC-\d{4}-\d{5}$/;
 
 // H11: detalle de una incidencia de la unidad, con fotos, responsable e
 // historial. H10 redirige aquí con ?registrada=<número> después de registrar.
-// H12: el Administrador entra a la misma pantalla y ve el panel "Gestión".
+// H12 y H13: el Administrador entra a la misma pantalla y ve los paneles
+// "Estado" y "Gestión".
 export default async function DetalleIncidenciaPage(props: PageProps<"/incidencias/[id]">) {
   const user = await requireAnyRole(["RESIDENTE", "ADMINISTRADOR"]);
   if (!user) return null;
@@ -97,6 +99,15 @@ export default async function DetalleIncidenciaPage(props: PageProps<"/incidenci
           <dd className="mt-0.5 whitespace-pre-line">{incident.description}</dd>
         </div>
       </dl>
+
+      {isAdmin ? (
+        <EstadoPanel
+          incidentId={incident.id}
+          number={incident.number}
+          status={incident.status}
+          hasAssignee={incident.assignee !== null}
+        />
+      ) : null}
 
       {isAdmin ? (
         <GestionPanel

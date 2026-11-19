@@ -3,7 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { GESTION_MESSAGES, isPriority, type IncidentPriority } from "@/lib/incidencias";
+import {
+  ESTADO_MESSAGES,
+  GESTION_MESSAGES,
+  isPriority,
+  isStatus,
+  validateNote,
+  type IncidentPriority,
+  type IncidentStatus,
+} from "@/lib/incidencias";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -86,4 +94,70 @@ export async function guardarGestion(_prev: GestionState, raw: GestionInput): Pr
   if (res.status === 409) return { error: message ?? GESTION_MESSAGES.resolved };
   console.error(`PATCH admin/incidencias/${id} respondió ${res.status}`);
   return { error: "No se pudieron guardar los cambios. Intenta más tarde." };
+}
+
+export type CambiarEstadoInput = {
+  id: string;
+  toStatus: IncidentStatus;
+  expectedStatus: IncidentStatus;
+  note: string;
+};
+
+export type CambiarEstadoState = { ok?: string; error?: string; noteError?: string };
+
+// POST /admin/incidencias/:id/estado (H13). Vuelve a validar la observación
+// por si el navegador se saltó la validación.
+export async function cambiarEstado(
+  _prev: CambiarEstadoState,
+  raw: CambiarEstadoInput,
+): Promise<CambiarEstadoState> {
+  const input = (raw ?? {}) as Partial<Record<keyof CambiarEstadoInput, unknown>>;
+  if (
+    typeof input.id !== "string" ||
+    !UUID_REGEX.test(input.id) ||
+    !isStatus(input.toStatus) ||
+    !isStatus(input.expectedStatus) ||
+    typeof input.note !== "string"
+  ) {
+    return { error: "Revisa los datos del cambio de estado." };
+  }
+  const note = input.note.trim();
+  const noteError = validateNote(note);
+  if (noteError) return { noteError };
+
+  let res: Response;
+  try {
+    res = await apiFetch(`admin/incidencias/${input.id}/estado`, {
+      method: "POST",
+      body: JSON.stringify({
+        toStatus: input.toStatus,
+        expectedStatus: input.expectedStatus,
+        note,
+      }),
+    });
+  } catch (error) {
+    // Un 401 redirige dentro de apiFetch (sesión expirada): deja pasar esa redirección.
+    unstable_rethrow(error);
+    console.error("Error al cambiar el estado de la incidencia:", error);
+    return { error: "No se pudo cambiar el estado. Intenta más tarde." };
+  }
+
+  if (res.ok) {
+    revalidatePath(`/incidencias/${input.id}`);
+    revalidatePath("/admin/incidencias");
+    return { ok: ESTADO_MESSAGES.saved };
+  }
+
+  const payload = await res.json().catch(() => null);
+  const message = firstMessage(payload);
+  if (res.status === 400) {
+    const field = (payload as { field?: unknown } | null)?.field;
+    if (field === "note") return { noteError: message ?? ESTADO_MESSAGES.note };
+    return { error: message ?? "Revisa los datos del cambio de estado." };
+  }
+  if (res.status === 403) return { error: "No tienes permiso para esta acción." };
+  if (res.status === 404) return { error: "La incidencia ya no existe." };
+  if (res.status === 409) return { error: message ?? "La incidencia cambió de estado. Actualiza la página." };
+  console.error(`POST admin/incidencias/${input.id}/estado respondió ${res.status}`);
+  return { error: "No se pudo cambiar el estado. Intenta más tarde." };
 }
