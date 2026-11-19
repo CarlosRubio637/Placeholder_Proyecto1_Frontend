@@ -3,10 +3,8 @@ import { apiFetch } from "@/lib/api";
 // Portería: quién está dentro (H18). Solo para Server Components: usa
 // apiFetch, que lee la cookie de sesión.
 
-export const DENTRO_PATH = "/seguridad/dentro";
+export { DENTRO_PATH } from "@/lib/dentro-client";
 export const DENTRO_PAGE_SIZE = 50;
-/** Cada cuánto se vuelve a consultar la lista mientras está abierta. */
-export const DENTRO_REFRESH_MS = 30_000;
 
 export type DocumentType = "DUI" | "PASAPORTE";
 

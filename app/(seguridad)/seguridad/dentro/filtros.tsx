@@ -2,11 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-
-// Ruta de la pantalla. Va aquí y no se importa de lib/dentro.ts porque ese
-// archivo usa apiFetch, que solo corre en el servidor.
-const DENTRO_PATH = "/seguridad/dentro";
-const SEARCH_MAX = 80;
+import { AVISO_PARAMS, DENTRO_PATH, DENTRO_SEARCH_MAX } from "@/lib/dentro-client";
 
 type Torre = { id: string; name: string };
 
@@ -36,8 +32,7 @@ export function FiltrosDentro({
     else query.delete(key);
     query.delete("page");
     // Un aviso de H17 ("Salida registrada…") no se arrastra al filtrar.
-    query.delete("aviso");
-    query.delete("alerta");
+    for (const name of AVISO_PARAMS) query.delete(name);
     const qs = query.toString();
     startTransition(() => router.replace(qs ? `${DENTRO_PATH}?${qs}` : DENTRO_PATH));
   }
@@ -53,7 +48,7 @@ export function FiltrosDentro({
   }, [value]);
 
   return (
-    <div className="flex flex-wrap items-end gap-4">
+    <div className="flex flex-wrap items-start gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="torre" className="text-sm font-medium">
           Torre
@@ -82,7 +77,7 @@ export function FiltrosDentro({
           type="search"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          maxLength={SEARCH_MAX}
+          maxLength={DENTRO_SEARCH_MAX}
           aria-describedby="buscar-ayuda"
           className={`${fieldClass} w-72 max-w-full`}
         />

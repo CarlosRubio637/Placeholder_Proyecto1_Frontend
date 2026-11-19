@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { DENTRO_PATH } from "@/lib/dentro";
+import { AVISO_SALIDA, DENTRO_PATH, type AlertaKey } from "@/lib/dentro-client";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -12,7 +12,6 @@ const UUID_REGEX =
 const KEEP = ["towerId", "search", "page"] as const;
 
 const SALIDA_MESSAGES = {
-  notInside: "Este visitante no tiene una entrada activa.",
   notFound: "La visita no existe.",
   forbidden: "No tienes permiso para esta acción.",
   generic: "No se pudo registrar la salida. Intenta más tarde.",
@@ -21,36 +20,36 @@ const SALIDA_MESSAGES = {
 export type SalidaInput = { id: string; query: string };
 export type SalidaState = { formError?: string };
 
-const hora = new Intl.DateTimeFormat("es-SV", {
+const horaFormat = new Intl.DateTimeFormat("es-SV", {
   timeZone: "America/El_Salvador",
   hour: "2-digit",
   minute: "2-digit",
   hourCycle: "h23",
 });
 
-/** Vuelve a "Quién está dentro" con los mismos filtros y el aviso indicado. */
-function backToList(query: string, key: "aviso" | "alerta", message: string): never {
+/**
+ * Vuelve a "Quién está dentro" con los mismos filtros y un aviso. La URL solo
+ * lleva una clave (y la hora, que la página valida); el texto lo pone la
+ * página, así nadie puede armar un enlace con un mensaje que parezca del
+ * sistema.
+ */
+function backToList(query: string, aviso: Record<string, string>): never {
   const current = new URLSearchParams(query);
   const next = new URLSearchParams();
   for (const name of KEEP) {
     const value = current.get(name);
     if (value) next.set(name, value);
   }
-  next.set(key, message);
+  for (const [key, value] of Object.entries(aviso)) next.set(key, value);
   revalidatePath(DENTRO_PATH);
   redirect(`${DENTRO_PATH}?${next.toString()}`);
 }
 
-function firstMessage(body: unknown) {
-  const message = (body as { message?: unknown } | null)?.message;
-  if (typeof message === "string") return message;
-  if (Array.isArray(message) && typeof message[0] === "string") return message[0];
-  return undefined;
-}
+const alerta = (key: AlertaKey) => ({ alerta: key });
 
 // POST /seguridad/visitas/:id/salida (H17). Con éxito o con 409/404 vuelve a
 // la lista (la fila cambia en los tres casos) conservando torre, búsqueda y
-// página, y muestra el aviso en la página.
+// página; la página muestra el aviso que corresponde a la clave.
 export async function registrarSalida(
   _prev: SalidaState,
   raw: SalidaInput,
@@ -73,18 +72,13 @@ export async function registrarSalida(
   if (res.ok) {
     const body = (await res.json().catch(() => null)) as { exitAt?: string } | null;
     const exitAt = body?.exitAt ? Date.parse(body.exitAt) : Number.NaN;
-    const when = hora.format(Number.isNaN(exitAt) ? Date.now() : exitAt);
-    backToList(query, "aviso", `Salida registrada a las ${when}`);
+    const hora = horaFormat.format(Number.isNaN(exitAt) ? Date.now() : exitAt);
+    backToList(query, { aviso: AVISO_SALIDA, hora });
   }
 
-  if (res.status === 409) {
-    // Otro agente ya registró la salida (o la visita no está Dentro).
-    backToList(query, "alerta", SALIDA_MESSAGES.notInside);
-  }
-  if (res.status === 404) {
-    const payload = await res.json().catch(() => null);
-    backToList(query, "alerta", firstMessage(payload) ?? SALIDA_MESSAGES.notFound);
-  }
+  // 409: otro agente ya registró la salida (o la visita no está Dentro).
+  if (res.status === 409) backToList(query, alerta("sin-entrada"));
+  if (res.status === 404) backToList(query, alerta("no-existe"));
   if (res.status === 403) return { formError: SALIDA_MESSAGES.forbidden };
 
   console.error(`POST seguridad/visitas/${id}/salida respondió ${res.status}`);

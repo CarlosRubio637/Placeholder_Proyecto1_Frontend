@@ -10,8 +10,10 @@ import {
   formatTiempoDentro,
   getDentro,
 } from "@/lib/dentro";
+import { ALERTAS, AVISO_SALIDA, HORA_REGEX } from "@/lib/dentro-client";
 import { getTorres } from "@/lib/paquetes";
 import { ActualizarDentro } from "./actualizar";
+import { AvisoSalida } from "./avisos";
 import { FiltrosDentro } from "./filtros";
 import { RegistrarSalida } from "./registrar-salida";
 
@@ -48,9 +50,16 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
   // Un towerId mal formado en la URL se ignora en vez de responder 400.
   const towerId = UUID_REGEX.test(rawTower) ? rawTower : "";
   const search = (first(searchParams.search) ?? "").trim().slice(0, 80);
-  // H17: aviso de éxito ("Salida registrada a las HH:mm") o de conflicto.
-  const aviso = first(searchParams.aviso)?.trim();
-  const alerta = first(searchParams.alerta)?.trim();
+  // H17: la URL solo trae una clave; el texto del aviso vive en el código.
+  const avisoKey = first(searchParams.aviso);
+  const hora = first(searchParams.hora) ?? "";
+  const alertaKey = first(searchParams.alerta) ?? "";
+  const aviso =
+    avisoKey === AVISO_SALIDA && HORA_REGEX.test(hora)
+      ? { tipo: "exito" as const, texto: `Salida registrada a las ${hora}` }
+      : Object.prototype.hasOwnProperty.call(ALERTAS, alertaKey)
+        ? { tipo: "alerta" as const, texto: ALERTAS[alertaKey as keyof typeof ALERTAS] }
+        : null;
 
   const [torres, lista] = await Promise.all([
     getTorres(),
@@ -80,23 +89,7 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
         </p>
       </div>
 
-      {aviso ? (
-        <p
-          role="status"
-          className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100"
-        >
-          {aviso}
-        </p>
-      ) : null}
-
-      {alerta ? (
-        <p
-          role="alert"
-          className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
-        >
-          {alerta}
-        </p>
-      ) : null}
+      <AvisoSalida aviso={aviso} />
 
       <div className="w-fit min-w-56 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Visitantes dentro</p>
