@@ -130,13 +130,23 @@ export default async function AsambleasPage(props: PageProps<"/admin/asambleas">
                           <EliminarAsamblea id={asamblea.id} title={asamblea.title} />
                         </>
                       ) : (
-                        <Link
-                          href={`${ASAMBLEAS_PATH}/${asamblea.id}`}
-                          aria-label={`Ver la asamblea ${asamblea.title}`}
-                          className={linkButtonClass}
-                        >
-                          Ver
-                        </Link>
+                        <>
+                          <Link
+                            href={`${ASAMBLEAS_PATH}/${asamblea.id}`}
+                            aria-label={`Ver la asamblea ${asamblea.title}`}
+                            className={linkButtonClass}
+                          >
+                            Ver
+                          </Link>
+                          {/* H24: resultado auditable (participación en vivo si está Abierta). */}
+                          <Link
+                            href={`${ASAMBLEAS_PATH}/${asamblea.id}/resultado`}
+                            aria-label={`Ver el resultado de la asamblea ${asamblea.title}`}
+                            className={linkButtonClass}
+                          >
+                            Resultado
+                          </Link>
+                        </>
                       )}
                     </div>
                   </td>
