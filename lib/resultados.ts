@@ -1,15 +1,11 @@
 import { apiFetch } from "@/lib/api";
+import { UUID_REGEX, type AsambleaStatus } from "@/lib/asambleas";
 
 // Resultado auditable de la asamblea (H24). Solo para Server Components:
 // usa apiFetch, que lee la cookie de sesión.
 
 export const PARTICIPACION_PAGE_SIZE = 50;
 export const CERRADAS_PAGE_SIZE = 10;
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-export type ResultadoStatus = "PROGRAMADA" | "ABIERTA" | "CERRADA";
 
 export type OpcionResultado = {
   id: string;
@@ -34,7 +30,7 @@ export type TemaResultado = {
 export type Resultado = {
   id: string;
   title: string;
-  status: ResultadoStatus;
+  status: AsambleaStatus;
   closedAt: string | null;
   topics: TemaResultado[];
 };
@@ -81,24 +77,7 @@ export async function getCerradas(page: number): Promise<{
   return res.json();
 }
 
-const DATE_TIME = new Intl.DateTimeFormat("es-SV", {
-  timeZone: "America/El_Salvador",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
-
-/** DD/MM/AAAA HH:mm en hora de El Salvador. */
-export function formatFechaHora(iso: string | null): string {
-  if (!iso) return "—";
-  const ms = Date.parse(iso);
-  return Number.isNaN(ms) ? "—" : DATE_TIME.format(ms).replace(", ", " ");
-}
-
-/** 63.6 → "63.6 %"; usa coma de miles y punto decimal como el resto de la app. */
+/** 63.6 → "63.6 %". */
 export function formatPct(value: number | null): string {
   return value === null ? "—" : `${value.toFixed(1)} %`;
 }

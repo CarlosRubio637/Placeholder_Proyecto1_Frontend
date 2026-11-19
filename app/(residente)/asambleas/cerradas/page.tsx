@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/api";
-import { CERRADAS_PAGE_SIZE, formatFechaHora, getCerradas } from "@/lib/resultados";
+import { formatFecha } from "@/lib/fechas";
+import { CERRADAS_PAGE_SIZE, getCerradas } from "@/lib/resultados";
 
 export const metadata: Metadata = { title: "Asambleas cerradas" };
 
@@ -72,13 +73,13 @@ export default async function AsambleasCerradasPage(props: PageProps<"/asambleas
               {list.data.map((asamblea) => (
                 <tr key={asamblea.id}>
                   <td className={`${tdClass} max-w-xs font-medium break-words`}>{asamblea.title}</td>
-                  <td className={`${tdClass} whitespace-nowrap`}>{formatFechaHora(asamblea.closedAt)}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{formatFecha(asamblea.closedAt)}</td>
                   <td className={`${tdClass} text-right tabular-nums`}>{asamblea.topicCount}</td>
                   <td className={`${tdClass} text-right`}>
                     <Link
                       href={`/asambleas/${asamblea.id}/resultado`}
                       aria-label={`Ver el resultado de la asamblea ${asamblea.title}`}
-                      className={linkButtonClass}
+                      className={`${linkButtonClass} whitespace-nowrap`}
                     >
                       Ver resultado
                     </Link>
