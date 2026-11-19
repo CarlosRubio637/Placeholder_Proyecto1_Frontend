@@ -97,3 +97,37 @@ export async function reservar(
   console.error(`Reservar respondió ${res.status}`);
   return { formError: SERVER_ERROR };
 }
+
+export type CancelarState = { error?: string };
+
+/** H8: PATCH /reservas/:id/cancelar. Con éxito, va al Historial con el aviso. */
+export async function cancelarReserva(
+  _prev: CancelarState,
+  formData: FormData,
+): Promise<CancelarState> {
+  const id = String(formData.get("id") ?? "");
+  let res: Response;
+  try {
+    res = await apiFetch(`reservas/${encodeURIComponent(id)}/cancelar`, { method: "PATCH" });
+  } catch (error) {
+    console.error("Error al cancelar la reserva:", error);
+    return { error: "No se pudo cancelar la reserva. Intenta más tarde." };
+  }
+
+  if (res.ok) {
+    revalidatePath("/reservas/mias");
+    redirect("/reservas/mias?tab=historial&aviso=reserva-cancelada");
+  }
+
+  const body = (await res.json().catch(() => null)) as { message?: unknown } | null;
+  const message = firstMessage(body);
+  if (res.status === 404 || res.status === 409) {
+    revalidatePath("/reservas/mias");
+    return { error: message ?? "No se pudo cancelar la reserva." };
+  }
+  if (res.status === 403) {
+    return { error: "No tienes permiso para esta acción." };
+  }
+  console.error(`Cancelar reserva respondió ${res.status}`);
+  return { error: "No se pudo cancelar la reserva. Intenta más tarde." };
+}

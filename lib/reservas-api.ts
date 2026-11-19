@@ -1,5 +1,11 @@
 import { apiFetch } from "@/lib/api";
-import type { AvailabilitySlot, PublicArea } from "@/lib/reservas";
+import {
+  MY_RESERVATIONS_PAGE_SIZE,
+  type AvailabilitySlot,
+  type MyReservation,
+  type MyReservationTab,
+  type PublicArea,
+} from "@/lib/reservas";
 
 // Consultas de H6 y H7 al backend (solo servidor: usan la cookie de sesión).
 
@@ -40,4 +46,21 @@ export async function fetchAvailability(areaId: string, date: string): Promise<A
     return { slots: [], error: typeof message === "string" ? message : "La fecha no es válida." };
   }
   throw new Error(`GET disponibilidad respondió ${res.status}`);
+}
+
+/** GET /reservas/mias (H8). */
+export async function fetchMyReservations(params: {
+  tab: MyReservationTab;
+  page: number;
+}): Promise<{ data: MyReservation[]; total: number }> {
+  const query = new URLSearchParams({
+    tab: params.tab,
+    page: String(params.page),
+    pageSize: String(MY_RESERVATIONS_PAGE_SIZE),
+  });
+  const res = await apiFetch(`reservas/mias?${query}`);
+  if (!res.ok) {
+    throw new Error(`GET reservas/mias respondió ${res.status}`);
+  }
+  return (await res.json()) as { data: MyReservation[]; total: number };
 }

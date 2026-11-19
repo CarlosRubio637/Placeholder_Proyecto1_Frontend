@@ -20,6 +20,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
     { href: "/reservas", label: "Áreas comunes" },
+    { href: "/reservas/mias", label: "Mis reservas" },
     { href: "/incidencias", label: "Mis incidencias" },
     { href: "/paquetes", label: "Mis paquetes" },
     { href: "/visitas/nueva", label: "Autorizar visita" },
