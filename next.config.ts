@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const UPLOAD_BODY_LIMIT = "16mb";
 
 const nextConfig: NextConfig = {
+  // Genera .next/standalone: un servidor de Node con solo las dependencias que
+  // usa la app. Es lo que copia el Dockerfile; en Vercel no afecta.
+  output: "standalone",
   experimental: {
     // Límite del cuerpo de los Server Actions (por defecto 1 MB).
     serverActions: {
