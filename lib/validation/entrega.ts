@@ -1,6 +1,7 @@
 // Reglas del formulario "Entregar paquete" (H21). Deben coincidir con
 // DeliverPackageDto del backend, que reutiliza las de H14 (visitas):
-// DUI 00000000-0 y pasaporte de 6 a 12 letras o números.
+// nombre con letras y espacios, DUI 00000000-0 y pasaporte de 6 a 12 letras
+// o números.
 // Este archivo no importa nada del servidor: lo usa un componente de cliente.
 
 export type DocType = "DUI" | "PASAPORTE";
@@ -10,7 +11,10 @@ export const DOC_TYPES: { value: DocType; label: string }[] = [
   { value: "PASAPORTE", label: "Pasaporte" },
 ];
 
-export const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' ]+$/;
+// Igual que el backend: cualquier letra (con tildes, ñ, ç, etc.) y espacios.
+// Con new RegExp porque el target de TypeScript (ES2017) no acepta \p{L} en
+// una regex literal.
+export const NAME_REGEX = new RegExp("^[\\p{L} ]+$", "u");
 export const DUI_REGEX = /^\d{8}-\d$/;
 export const PASSPORT_REGEX = /^[A-Za-z0-9]{6,12}$/;
 

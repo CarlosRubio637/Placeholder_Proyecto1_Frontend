@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { PAQUETES_PATH } from "@/lib/paquetes";
 import {
@@ -60,6 +60,9 @@ export async function entregarPaquete(
       body: JSON.stringify(values),
     });
   } catch (error) {
+    // Con un 401 (sesión vencida) `apiFetch` redirige al login lanzando una
+    // excepción interna de Next: hay que dejarla pasar.
+    unstable_rethrow(error);
     console.error("Error al registrar la entrega:", error);
     return { formError: "No se pudo registrar la entrega. Intenta más tarde." };
   }
@@ -80,11 +83,14 @@ export async function entregarPaquete(
     return { formError: message ?? "Revisa los datos del formulario." };
   }
   if (res.status === 403) return { formError: "No tienes permiso para esta acción." };
-  if (res.status === 404) return { formError: message ?? "El paquete no existe." };
-  if (res.status === 409) {
-    // Otro agente ya lo entregó: se recarga la lista para que la fila salga.
+  if (res.status === 404 || res.status === 409) {
+    // 409: otro agente ya lo entregó. 404: el paquete ya no existe. En los dos
+    // casos la fila tiene que salir de la lista, y al recargarla se cerraría
+    // el diálogo con el mensaje; por eso el aviso se muestra en la página.
+    const fallback =
+      res.status === 409 ? "Este paquete ya fue entregado." : "El paquete no existe.";
     revalidatePath(PAQUETES_PATH);
-    return { formError: message ?? "Este paquete ya fue entregado." };
+    redirect(`${PAQUETES_PATH}?alerta=${encodeURIComponent(message ?? fallback)}`);
   }
 
   console.error(`POST seguridad/paquetes/${id}/entrega respondió ${res.status}`);
