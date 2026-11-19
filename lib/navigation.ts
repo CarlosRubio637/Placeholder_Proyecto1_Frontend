@@ -25,6 +25,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/visitas/nueva", label: "Autorizar visita" },
     { href: "/asambleas", label: "Asambleas activas" },
     { href: "/comunicados", label: "Comunicados" },
+    { href: "/directorio", label: "Directorio de vecinos" },
     { href: "/perfil", label: "Mi perfil y privacidad" },
     NOTIFICACIONES,
   ],
