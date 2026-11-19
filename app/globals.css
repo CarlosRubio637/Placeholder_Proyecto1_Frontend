@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F4EFE6;
+  --foreground: #2B231B;
 }
 
 @theme inline {
@@ -12,15 +12,40 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Paleta del condominio: la escala zinc de Tailwind pasa a cafés cálidos, así
+ * todas las clases zinc-* existentes cambian sin tocar los componentes. El
+ * verde es el color de marca (botones principales y elementos activos).
+ */
+@theme {
+  --color-zinc-50: #F7F3EC;
+  --color-zinc-100: #EFE8DC;
+  --color-zinc-200: #E0D5C3;
+  --color-zinc-300: #CBBBA2;
+  --color-zinc-400: #A8957A;
+  --color-zinc-500: #7A6650;
+  --color-zinc-600: #6B5844;
+  --color-zinc-700: #554534;
+  --color-zinc-800: #3E3226;
+  --color-zinc-900: #2B231B;
+  --color-zinc-950: #1C1712;
+
+  --color-primary: #5B7B3C;
+  --color-primary-hover: #4A6631;
+  --color-primary-foreground: #FFFFFF;
+  --color-primary-soft: #F1F4EC;
+  --color-sage: #C5D1B5;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1C1712;
+    --foreground: #EFE8DC;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
