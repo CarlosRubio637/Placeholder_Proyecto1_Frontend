@@ -9,7 +9,7 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
 
   return (
     <nav aria-label="Menú principal">
-      <ul className="flex gap-1 md:flex-col">
+      <ul className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
         {items.map((item) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -18,7 +18,7 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="block rounded-md px-3 py-2 text-sm hover:bg-zinc-100 aria-[current=page]:bg-zinc-200 aria-[current=page]:font-medium dark:hover:bg-zinc-900 dark:aria-[current=page]:bg-zinc-800"
+                className="block whitespace-nowrap rounded-md px-3 py-2 text-sm hover:bg-zinc-100 md:hover:bg-zinc-700 aria-[current=page]:bg-primary! aria-[current=page]:font-medium aria-[current=page]:text-white dark:hover:bg-zinc-900 md:dark:hover:bg-zinc-700 dark:aria-[current=page]:bg-primary!"
               >
                 {item.label}
               </Link>
