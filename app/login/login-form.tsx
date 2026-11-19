@@ -22,7 +22,7 @@ export function LoginForm() {
           required
           defaultValue={state.email}
           placeholder="tu@correo.com"
-          className="rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100"
+          className="rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-zinc-700 dark:focus:border-zinc-100"
         />
       </div>
 
@@ -36,7 +36,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100"
+          className="rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-zinc-700 dark:focus:border-zinc-100"
         />
       </div>
 
@@ -47,7 +47,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:opacity-60"
+        className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground transition-opacity disabled:opacity-60"
       >
         {pending ? "Ingresando..." : "Iniciar sesión"}
       </button>

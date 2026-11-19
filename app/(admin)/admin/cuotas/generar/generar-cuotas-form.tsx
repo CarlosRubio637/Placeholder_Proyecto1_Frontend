@@ -29,7 +29,7 @@ const initialState: GenerarCuotasState = {};
 const ALL_TOUCHED = { period: true, amount: true, dueDate: true, concept: true };
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 function trimmed(values: GeneracionValues): GeneracionValues {
   return { ...values, amount: values.amount.trim(), concept: values.concept.trim() };
@@ -264,7 +264,7 @@ export function GenerarCuotasForm({ today }: { today: string }) {
       <button
         type="submit"
         disabled={hasErrors || busy}
-        className="w-full rounded-md bg-foreground px-4 py-2.5 font-medium text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-md bg-primary hover:bg-primary-hover px-4 py-2.5 font-medium text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
       >
         {checking ? "Consultando..." : pending ? "Generando..." : "Generar"}
       </button>
@@ -290,7 +290,7 @@ export function GenerarCuotasForm({ today }: { today: string }) {
           <button
             type="button"
             onClick={confirmGeneration}
-            className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background"
+            className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Continuar
           </button>

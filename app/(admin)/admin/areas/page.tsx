@@ -26,7 +26,7 @@ export default async function AreasAdminPage(props: PageProps<"/admin/areas">) {
         <h1 className="text-2xl font-semibold">Áreas comunes (administración)</h1>
         <Link
           href="/admin/areas/nueva"
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background"
+          className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground"
         >
           Nueva área
         </Link>

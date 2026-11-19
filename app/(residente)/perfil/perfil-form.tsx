@@ -8,7 +8,7 @@ import { sameValues, turnOn, validatePerfil, type PerfilField, type PerfilValues
 const initialState: GuardarState = {};
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 const readOnlyClass =
   "w-full rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
@@ -174,7 +174,7 @@ export function PerfilForm({ perfil }: { perfil: Perfil }) {
           <button
             type="submit"
             disabled={unchanged || hasErrors || pending}
-            className="w-full rounded-md bg-foreground px-4 py-2.5 font-medium text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-md bg-primary hover:bg-primary-hover px-4 py-2.5 font-medium text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Guardando..." : "Guardar"}
           </button>

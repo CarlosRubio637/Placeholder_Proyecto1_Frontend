@@ -8,7 +8,7 @@ import type { RegistroField } from "@/lib/validation/registro";
 const initialState: RegistroState = {};
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 type FieldProps = {
   name: RegistroField;
@@ -128,7 +128,7 @@ export function RegistroForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:opacity-60"
+        className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground transition-opacity disabled:opacity-60"
       >
         {pending ? "Creando cuenta..." : "Crear cuenta"}
       </button>
