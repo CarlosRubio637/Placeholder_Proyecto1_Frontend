@@ -41,6 +41,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   SEGURIDAD: [
     { href: "/", label: "Inicio" },
     { href: "/seguridad/paquetes", label: "Paquetes" },
+    { href: "/seguridad/dentro", label: "Quién está dentro" },
     NOTIFICACIONES,
   ],
 };
