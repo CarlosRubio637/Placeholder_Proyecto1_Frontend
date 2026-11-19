@@ -35,6 +35,9 @@ export function FiltrosDentro({
     if (next) query.set(key, next);
     else query.delete(key);
     query.delete("page");
+    // Un aviso de H17 ("Salida registrada…") no se arrastra al filtrar.
+    query.delete("aviso");
+    query.delete("alerta");
     const qs = query.toString();
     startTransition(() => router.replace(qs ? `${DENTRO_PATH}?${qs}` : DENTRO_PATH));
   }
