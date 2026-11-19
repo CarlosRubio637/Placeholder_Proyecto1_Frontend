@@ -13,7 +13,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
 
   return (
     <div className="flex flex-1 items-center justify-center px-4">
-      <main className="w-full max-w-sm rounded-xl border border-zinc-200 p-8 dark:border-zinc-800">
+      <main className="w-full max-w-sm rounded-xl border border-zinc-200 border-t-4 border-t-primary bg-white p-8 shadow-sm dark:border-zinc-800 dark:border-t-primary dark:bg-zinc-900">
         <h1 className="mb-6 text-2xl font-semibold">Iniciar sesión</h1>
         {mensaje ? (
           <p
