@@ -20,6 +20,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   RESIDENTE: [
     { href: "/", label: "Inicio" },
     { href: "/reservas", label: "Áreas comunes" },
+    { href: "/estado-de-cuenta", label: "Estado de cuenta" },
     { href: "/incidencias", label: "Mis incidencias" },
     { href: "/paquetes", label: "Mis paquetes" },
     { href: "/visitas/nueva", label: "Autorizar visita" },
@@ -32,6 +33,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/", label: "Inicio" },
     { href: "/admin/areas", label: "Áreas comunes" },
     { href: "/admin/cuotas/generar", label: "Generar cuotas" },
+    { href: "/admin/unidades", label: "Unidades" },
     { href: "/admin/asambleas", label: "Asambleas" },
     { href: "/admin/reportes/morosidad", label: "Morosidad" },
     { href: "/admin/reportes/incidencias", label: "Incidencias abiertas" },
