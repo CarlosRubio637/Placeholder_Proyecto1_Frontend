@@ -100,25 +100,30 @@ export function categoryLabel(category: Categoria): string {
   );
 }
 
-function first(value: string | string[] | undefined): string | undefined {
+export function firstParam(
+  value: string | string[] | undefined,
+): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+export function parsePage(value: string | undefined): number {
+  const page = Number(value ?? "1");
+  return Number.isSafeInteger(page) && page >= 1
+    ? Math.min(page, RESIDENT_MAX_PAGE)
+    : 1;
 }
 
 export function parseListParams(
   searchParams: Record<string, string | string[] | undefined>,
 ): ComunicadosFiltro {
-  const tab = first(searchParams.tab);
-  const category = first(searchParams.category);
-  const page = Number(first(searchParams.page) ?? "1");
+  const tab = firstParam(searchParams.tab);
+  const category = firstParam(searchParams.category);
   return {
     tab: PESTANAS.find((option) => option === tab) ?? "vigentes",
     category:
       CATEGORY_OPTIONS.find((option) => option.value === category)?.value ??
       null,
-    page:
-      Number.isSafeInteger(page) && page >= 1
-        ? Math.min(page, RESIDENT_MAX_PAGE)
-        : 1,
+    page: parsePage(firstParam(searchParams.page)),
   };
 }
 
@@ -164,7 +169,10 @@ export function fechaVigencia(isoDate: string): string {
   return `${day}/${month}/${year}`;
 }
 
+export function horaCorta(iso: string): string {
+  return timeFormatter.format(new Date(iso));
+}
+
 export function lecturaText(iso: string): string {
-  const moment = new Date(iso);
-  return `Leído el ${dateFormatter.format(moment)} a las ${timeFormatter.format(moment)}`;
+  return `Leído el ${fechaCorta(iso)} a las ${horaCorta(iso)}`;
 }
