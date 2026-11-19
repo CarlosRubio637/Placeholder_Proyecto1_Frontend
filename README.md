@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details..
+
+## Pruebas de componente
+
+Usan Vitest con React Testing Library:
+
+```bash
+npm test
+```
+
+- El archivo va junto al componente y termina en `.test.tsx`.
+- `describe('H#. Título de la historia')`, y cada `it` empieza con el criterio que verifica: `it('AC2: ...')`.
+- Vitest no puede renderizar los Server Components `async` (las páginas que consultan la API). Se prueban los componentes cliente, los componentes síncronos y las funciones de `lib/`.
+- Las server actions se reemplazan con `vi.mock`, como en `app/(residente)/perfil/perfil-form.test.tsx`.
