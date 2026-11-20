@@ -19,8 +19,8 @@ export function AppShell({
   const items = role ? NAV_BY_ROLE[role] : [];
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-primary-hover bg-primary px-6 py-3 text-white dark:border-primary-hover">
+    <div className="flex flex-1 flex-col md:h-dvh md:overflow-hidden">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-primary-hover bg-primary px-6 py-3 text-white dark:border-primary-hover">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <svg
             aria-hidden="true"
@@ -60,11 +60,13 @@ export function AppShell({
           </form>
         </div>
       </header>
-      <div className="flex flex-1 flex-col md:flex-row">
-        <aside className="border-b border-zinc-200 p-3 md:w-56 md:shrink-0 md:border-r md:border-b-0 md:border-zinc-800 md:bg-zinc-800 md:text-zinc-100 dark:border-zinc-800">
+      <div className="flex flex-1 flex-col md:min-h-0 md:flex-row">
+        <aside className="border-b border-zinc-200 p-3 md:w-60 md:shrink-0 md:overflow-y-auto md:border-r md:border-b-0 md:border-zinc-800 md:bg-zinc-800 md:p-4 md:text-zinc-100 dark:border-zinc-800">
           <SidebarNav items={items} />
         </aside>
-        <main className="min-w-0 flex-1 p-6">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 md:overflow-y-auto md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-6xl">{children}</div>
+        </main>
       </div>
     </div>
   );
