@@ -20,7 +20,7 @@ export default async function AutorizarVisitaPage() {
   const nowMs = ahora();
 
   return (
-    <div className="max-w-2xl">
+    <div className="mx-auto w-full max-w-2xl">
       <h1 className="text-2xl font-semibold">Autorizar visita</h1>
       <p className="mt-1 mb-6 text-sm text-zinc-600 dark:text-zinc-400">
         Registra a tu visitante antes de que llegue. Recibirás un código que seguridad le

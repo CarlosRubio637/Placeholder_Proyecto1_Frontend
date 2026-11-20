@@ -41,7 +41,7 @@ export default async function ComunicadosPage(
   }
 
   return (
-    <div className="flex max-w-5xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-5xl flex-col gap-6">
       <h1 className="text-2xl font-semibold">Comunicados</h1>
 
       <FiltrosComunicados tab={filtro.tab} category={filtro.category} />

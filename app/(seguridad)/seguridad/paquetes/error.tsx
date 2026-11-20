@@ -2,7 +2,7 @@
 
 export default function PaquetesError({ reset }: { reset: () => void }) {
   return (
-    <div role="alert" className="flex max-w-xl flex-col items-start gap-3">
+    <div role="alert" className="mx-auto w-full flex max-w-xl flex-col items-start gap-3">
       <p className="text-lg font-medium">No se pudo cargar la información de paquetes.</p>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Revisa tu conexión e intenta de nuevo. Si el problema sigue, avisa a soporte.

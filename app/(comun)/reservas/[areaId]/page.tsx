@@ -30,7 +30,7 @@ export default async function DisponibilidadPage(props: PageProps<"/reservas/[ar
   if (result.notFound) notFound();
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-3xl flex-col gap-6">
       <div>
         <Link href="/reservas" className="text-sm underline underline-offset-4">
           Áreas comunes

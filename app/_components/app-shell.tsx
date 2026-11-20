@@ -61,7 +61,7 @@ export function AppShell({
         </div>
       </header>
       <div className="flex flex-1 flex-col md:min-h-0 md:flex-row">
-        <aside className="border-b border-zinc-200 p-3 md:w-60 md:shrink-0 md:overflow-y-auto md:border-r md:border-b-0 md:border-zinc-800 md:bg-zinc-800 md:p-4 md:text-zinc-100 dark:border-zinc-800">
+        <aside className="border-b border-zinc-200 p-3 md:w-60 md:shrink-0 md:overflow-y-auto md:border-r md:border-b-0 md:bg-white md:p-4 dark:border-zinc-800 md:dark:bg-zinc-900">
           <SidebarNav items={items} />
         </aside>
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 md:overflow-y-auto md:px-8 md:py-8">

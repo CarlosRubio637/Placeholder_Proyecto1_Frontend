@@ -15,7 +15,7 @@ export default async function NuevoComunicadoPage() {
   const towers = await getTorres();
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-2xl flex-col gap-6">
       <h1 className="text-2xl font-semibold">Nuevo comunicado</h1>
       <section
         aria-label="Nuevo comunicado"

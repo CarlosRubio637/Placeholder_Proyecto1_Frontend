@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F4EFE6;
-  --foreground: #2B231B;
+  --background: #F6F5F1;
+  --foreground: #1F1D1A;
 }
 
 @theme inline {
@@ -13,22 +13,23 @@
 }
 
 /*
- * Paleta del condominio: la escala zinc de Tailwind pasa a cafés cálidos, así
- * todas las clases zinc-* existentes cambian sin tocar los componentes. El
- * verde es el color de marca (botones principales y elementos activos).
+ * Paleta del condominio: la escala zinc de Tailwind pasa a grises cálidos
+ * (apenas tostados), así todas las clases zinc-* existentes cambian sin tocar
+ * los componentes. El verde es el color de marca (botones principales y
+ * elementos activos).
  */
 @theme {
-  --color-zinc-50: #F7F3EC;
-  --color-zinc-100: #EFE8DC;
-  --color-zinc-200: #E0D5C3;
-  --color-zinc-300: #CBBBA2;
-  --color-zinc-400: #A8957A;
-  --color-zinc-500: #7A6650;
-  --color-zinc-600: #6B5844;
-  --color-zinc-700: #554534;
-  --color-zinc-800: #3E3226;
-  --color-zinc-900: #2B231B;
-  --color-zinc-950: #1C1712;
+  --color-zinc-50: #FAFAF8;
+  --color-zinc-100: #F4F3F0;
+  --color-zinc-200: #E6E4DF;
+  --color-zinc-300: #D3D0C9;
+  --color-zinc-400: #A6A29A;
+  --color-zinc-500: #6F6A62;
+  --color-zinc-600: #5A564F;
+  --color-zinc-700: #45413B;
+  --color-zinc-800: #2D2A26;
+  --color-zinc-900: #1F1D1A;
+  --color-zinc-950: #12110F;
 
   --color-primary: #5B7B3C;
   --color-primary-hover: #4A6631;
@@ -39,8 +40,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1C1712;
-    --foreground: #EFE8DC;
+    --background: #12110F;
+    --foreground: #F4F3F0;
   }
 }
 

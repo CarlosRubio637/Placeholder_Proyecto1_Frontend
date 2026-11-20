@@ -37,7 +37,7 @@ export default async function ComunicadoPage(
 
   if (!result.ok) {
     return (
-      <div className="flex max-w-3xl flex-col items-start gap-4">
+      <div className="mx-auto w-full flex max-w-3xl flex-col items-start gap-4">
         <p role="alert" className="text-lg font-medium">
           {result.error === "forbidden"
             ? "No tienes permiso para ver esta página."
@@ -52,7 +52,7 @@ export default async function ComunicadoPage(
   const archived = comunicado.expiresOn < todaySV();
 
   return (
-    <div className="flex max-w-3xl flex-col gap-4">
+    <div className="mx-auto w-full flex max-w-3xl flex-col gap-4">
       <VolverLink href={volver} />
       <article className="flex min-w-0 flex-col gap-4 rounded-xl border border-zinc-200 p-6 dark:border-zinc-800">
         <header className="flex flex-col gap-2">

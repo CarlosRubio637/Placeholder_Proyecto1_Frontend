@@ -145,7 +145,7 @@ export function BandejaNotificaciones({ role }: { role: Role }) {
     : 1;
 
   return (
-    <div className="flex max-w-4xl flex-col gap-4">
+    <div className="mx-auto w-full flex max-w-4xl flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Notificaciones</h1>
         <div className="flex gap-2">
