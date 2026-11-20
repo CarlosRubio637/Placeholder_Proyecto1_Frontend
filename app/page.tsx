@@ -1,10 +1,14 @@
+import { redirect } from "next/navigation";
 import { AppShell } from "@/app/_components/app-shell";
 import { getCurrentUser } from "@/lib/api";
+import { RESUMEN_PATH } from "@/lib/resumen";
 import { ROLE_LABELS, isRole } from "@/lib/roles";
 
 // Inicio: común a los tres roles. El menú lateral muestra las opciones del rol.
+// El Administrador tiene su propia pantalla de inicio: el resumen (H37).
 export default async function Home() {
   const user = await getCurrentUser();
+  if (user.role === "ADMINISTRADOR") redirect(RESUMEN_PATH);
 
   return (
     <AppShell user={user}>

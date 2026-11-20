@@ -29,7 +29,8 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     NOTIFICACIONES,
   ],
   ADMINISTRADOR: [
-    { href: "/", label: "Inicio" },
+    // Su inicio es el resumen del condominio (H37).
+    { href: "/admin/resumen", label: "Inicio" },
     { href: "/admin/areas", label: "Áreas comunes" },
     { href: "/admin/incidencias", label: "Incidencias" },
     { href: "/admin/cuotas/generar", label: "Generar cuotas" },
