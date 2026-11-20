@@ -18,7 +18,7 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="block whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors hover:bg-zinc-100 md:border-l-4 md:border-transparent md:py-2.5 md:aria-[current=page]:border-primary-hover aria-[current=page]:bg-primary! aria-[current=page]:font-medium aria-[current=page]:text-white dark:hover:bg-zinc-800 dark:aria-[current=page]:bg-primary!"
+                className="block whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors hover:bg-zinc-100 md:border-l-4 md:border-transparent md:py-2.5 md:hover:bg-zinc-700/60 md:aria-[current=page]:border-sage aria-[current=page]:bg-primary! aria-[current=page]:font-medium aria-[current=page]:text-white dark:hover:bg-zinc-900 md:dark:hover:bg-zinc-700 dark:aria-[current=page]:bg-primary!"
               >
                 {item.label}
               </Link>
