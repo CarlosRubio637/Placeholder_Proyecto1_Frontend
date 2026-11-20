@@ -12,7 +12,7 @@ import {
 } from "@/lib/validation/reporte-periodo";
 
 const inputClass =
-  "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:border-zinc-100 dark:disabled:bg-zinc-900";
+  "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:border-zinc-100 dark:disabled:bg-zinc-900";
 const buttonClass =
   "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-900";
 

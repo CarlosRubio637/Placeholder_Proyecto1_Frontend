@@ -26,7 +26,7 @@ export function RegistrarEntradaButton({ visitId, onEntry }: Props) {
         type="button"
         onClick={() => void onClick()}
         disabled={pending}
-        className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-md bg-primary hover:bg-primary-hover px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         {pending ? "Registrando…" : "Registrar entrada"}
       </button>
