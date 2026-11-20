@@ -12,7 +12,8 @@ export type PackageStatus = "PENDIENTE_ENTREGA" | "ENTREGADO";
 
 export type Torre = { id: string; name: string; letter: string };
 export type UnidadRef = { id: string; code: string };
-export type Unidad = UnidadRef & { number: string };
+/** residentCount: residentes activos (H16); H19 no lo usa. */
+export type Unidad = UnidadRef & { number: string; residentCount: number };
 
 // ----------------- H19 -----------------
 
