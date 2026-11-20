@@ -10,9 +10,12 @@ import {
   formatTiempoDentro,
   getDentro,
 } from "@/lib/dentro";
+import { ALERTAS, AVISO_SALIDA, HORA_REGEX } from "@/lib/dentro-client";
 import { getTorres } from "@/lib/paquetes";
 import { ActualizarDentro } from "./actualizar";
+import { AvisoSalida } from "./avisos";
 import { FiltrosDentro } from "./filtros";
+import { RegistrarSalida } from "./registrar-salida";
 
 export const metadata: Metadata = { title: "Quién está dentro" };
 
@@ -36,6 +39,7 @@ const linkButtonClass =
 // H18: "Portería: quién está dentro". Lista las visitas Dentro, la entrada
 // más antigua primero, con filtros por torre y búsqueda. Se actualiza cada
 // 30 s y con el botón Actualizar.
+// H17: cada fila tiene "Registrar salida" con confirmación.
 export default async function DentroPage(props: PageProps<"/seguridad/dentro">) {
   const user = await requireRole("SEGURIDAD");
   if (!user) return null;
@@ -46,6 +50,16 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
   // Un towerId mal formado en la URL se ignora en vez de responder 400.
   const towerId = UUID_REGEX.test(rawTower) ? rawTower : "";
   const search = (first(searchParams.search) ?? "").trim().slice(0, 80);
+  // H17: la URL solo trae una clave; el texto del aviso vive en el código.
+  const avisoKey = first(searchParams.aviso);
+  const hora = first(searchParams.hora) ?? "";
+  const alertaKey = first(searchParams.alerta) ?? "";
+  const aviso =
+    avisoKey === AVISO_SALIDA && HORA_REGEX.test(hora)
+      ? { tipo: "exito" as const, texto: `Salida registrada a las ${hora}` }
+      : Object.prototype.hasOwnProperty.call(ALERTAS, alertaKey)
+        ? { tipo: "alerta" as const, texto: ALERTAS[alertaKey as keyof typeof ALERTAS] }
+        : null;
 
   const [torres, lista] = await Promise.all([
     getTorres(),
@@ -74,6 +88,8 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
           Visitantes con entrada registrada y sin salida, de la entrada más antigua a la más reciente.
         </p>
       </div>
+
+      <AvisoSalida aviso={aviso} />
 
       <div className="w-fit min-w-56 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Visitantes dentro</p>
@@ -116,6 +132,9 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
                 <th scope="col" className={thClass}>Motivo</th>
                 <th scope="col" className={thClass}>Entrada</th>
                 <th scope="col" className={thClass}>Tiempo dentro</th>
+                <th scope="col" className={thClass}>
+                  <span className="sr-only">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -132,6 +151,11 @@ export default async function DentroPage(props: PageProps<"/seguridad/dentro">) 
                   </td>
                   <td className={`${tdClass} whitespace-nowrap tabular-nums`}>
                     {formatTiempoDentro(visita.minutesInside)}
+                  </td>
+                  <td className={tdClass}>
+                    <div className="flex justify-end">
+                      <RegistrarSalida id={visita.id} visitorName={visita.visitorName} />
+                    </div>
                   </td>
                 </tr>
               ))}
