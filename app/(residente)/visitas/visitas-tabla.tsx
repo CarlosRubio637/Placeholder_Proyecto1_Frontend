@@ -15,7 +15,7 @@ import {
   type MiVisita,
 } from "@/lib/mis-visitas";
 
-type Props = { visitas: MiVisita[]; poll: boolean };
+type Props = { visitas: MiVisita[]; poll: boolean; emptyMessage: string };
 
 const thClass = "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500";
 const tdClass = "px-4 py-3 align-top text-sm";
@@ -25,8 +25,8 @@ const primaryButton = "rounded-md bg-foreground px-3 py-1.5 text-sm font-medium 
 type Pending = { kind: "cancel" | "reject"; visita: MiVisita };
 
 // Tabla de "Mis visitas" (H15) con Cancelar, Aprobar y Rechazar. En Activas
-// vuelve a pedir la lista cada 15 segundos.
-export function VisitasTabla({ visitas, poll }: Props) {
+// vuelve a pedir la lista cada 15 segundos, también cuando está vacía.
+export function VisitasTabla({ visitas, poll, emptyMessage }: Props) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState<Pending | null>(null);
@@ -80,72 +80,77 @@ export function VisitasTabla({ visitas, poll }: Props) {
         <p role="alert" className="text-sm text-red-600">{aviso.error}</p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
-          <thead className="bg-zinc-50 dark:bg-zinc-900">
-            <tr>
-              <th scope="col" className={thClass}>Visitante</th>
-              <th scope="col" className={thClass}>Fecha</th>
-              <th scope="col" className={thClass}>Hora</th>
-              <th scope="col" className={thClass}>Motivo</th>
-              <th scope="col" className={thClass}>Código</th>
-              <th scope="col" className={thClass}>Estado</th>
-              <th scope="col" className={thClass}>Creada por</th>
-              <th scope="col" className={thClass}><span className="sr-only">Acciones</span></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {visitas.map((visita) => (
-              <tr key={visita.id}>
-                <td className={tdClass}>
-                  <p className="font-medium">{visita.visitorName}</p>
-                  <p className="text-zinc-600 dark:text-zinc-400">
-                    {documentLabel(visita.documentType, visita.documentNumber)}
-                  </p>
-                </td>
-                <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{formatFecha(visita.visitDate)}</td>
-                <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{horaLabel(visita)}</td>
-                <td className={`${tdClass} max-w-xs break-words`}>{visita.reason}</td>
-                <td className={`${tdClass} whitespace-nowrap font-mono`}>{visita.code ?? "—"}</td>
-                <td className={tdClass}>
-                  <p className="font-medium">{STATUS_LABELS[visita.status]}</p>
-                  {visita.status === "PENDIENTE_AUTORIZACION" && visita.expiresAt ? (
-                    <p className="text-amber-700 dark:text-amber-400">
-                      {MESSAGES.waiting(minutosRestantes(visita.expiresAt, now))}
-                    </p>
-                  ) : null}
-                  {visita.status === "RECHAZADA" && visita.rejectReason ? (
-                    <p className="text-zinc-600 dark:text-zinc-400">Motivo: {visita.rejectReason}</p>
-                  ) : null}
-                </td>
-                <td className={`${tdClass} whitespace-nowrap`}>{visita.createdBy}</td>
-                <td className={`${tdClass} whitespace-nowrap`}>
-                  {visita.status === "AUTORIZADA" ? (
-                    <button type="button" disabled={busy !== null} onClick={() => open({ kind: "cancel", visita })} className={smallButton}>
-                      Cancelar
-                    </button>
-                  ) : null}
-                  {visita.status === "PENDIENTE_AUTORIZACION" ? (
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        disabled={busy !== null}
-                        onClick={() => void run(visita.id, () => responderVisita(visita.id, "APROBAR", ""))}
-                        className={primaryButton}
-                      >
-                        {busy === visita.id ? "Enviando…" : "Aprobar"}
-                      </button>
-                      <button type="button" disabled={busy !== null} onClick={() => open({ kind: "reject", visita })} className={smallButton}>
-                        Rechazar
-                      </button>
-                    </div>
-                  ) : null}
-                </td>
+      {visitas.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
+          <p className="font-medium">{emptyMessage}</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+            <thead className="bg-zinc-50 dark:bg-zinc-900">
+              <tr>
+                <th scope="col" className={thClass}>Visitante</th>
+                <th scope="col" className={thClass}>Documento</th>
+                <th scope="col" className={thClass}>Fecha</th>
+                <th scope="col" className={thClass}>Hora</th>
+                <th scope="col" className={thClass}>Motivo</th>
+                <th scope="col" className={thClass}>Código</th>
+                <th scope="col" className={thClass}>Estado</th>
+                <th scope="col" className={thClass}>Creada por</th>
+                <th scope="col" className={thClass}><span className="sr-only">Acciones</span></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {visitas.map((visita) => (
+                <tr key={visita.id}>
+                  <td className={`${tdClass} font-medium`}>{visita.visitorName}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>
+                    {documentLabel(visita.documentType, visita.documentNumber)}
+                  </td>
+                  <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{formatFecha(visita.visitDate)}</td>
+                  <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{horaLabel(visita)}</td>
+                  <td className={`${tdClass} max-w-xs break-words`}>{visita.reason}</td>
+                  <td className={`${tdClass} whitespace-nowrap font-mono`}>{visita.code ?? "—"}</td>
+                  <td className={tdClass}>
+                    <p className="font-medium">{STATUS_LABELS[visita.status]}</p>
+                    {visita.status === "PENDIENTE_AUTORIZACION" && visita.expiresAt ? (
+                      <p className="text-amber-700 dark:text-amber-400">
+                        {MESSAGES.waiting(minutosRestantes(visita.expiresAt, now))}
+                      </p>
+                    ) : null}
+                    {visita.status === "RECHAZADA" && visita.rejectReason ? (
+                      <p className="text-zinc-600 dark:text-zinc-400">Motivo: {visita.rejectReason}</p>
+                    ) : null}
+                  </td>
+                  <td className={`${tdClass} whitespace-nowrap`}>{visita.createdBy}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>
+                    {visita.status === "AUTORIZADA" ? (
+                      <button type="button" disabled={busy !== null} onClick={() => open({ kind: "cancel", visita })} className={smallButton}>
+                        Cancelar
+                      </button>
+                    ) : null}
+                    {visita.status === "PENDIENTE_AUTORIZACION" ? (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          disabled={busy !== null}
+                          onClick={() => void run(visita.id, () => responderVisita(visita.id, "APROBAR", ""))}
+                          className={primaryButton}
+                        >
+                          {busy === visita.id ? "Enviando…" : "Aprobar"}
+                        </button>
+                        <button type="button" disabled={busy !== null} onClick={() => open({ kind: "reject", visita })} className={smallButton}>
+                          Rechazar
+                        </button>
+                      </div>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <dialog
         ref={dialog}

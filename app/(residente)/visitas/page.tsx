@@ -70,13 +70,13 @@ export default async function MisVisitasPage(props: PageProps<"/visitas">) {
         <ActualizarButton />
       </div>
 
-      {lista.data.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center dark:border-zinc-700">
-          <p className="font-medium">{tab === "activas" ? MESSAGES.emptyActive : MESSAGES.emptyHistory}</p>
-        </div>
-      ) : (
-        <VisitasTabla visitas={lista.data} poll={tab === "activas"} />
-      )}
+      {/* Se monta aunque no haya filas: el refresco de Activas y el aviso de la
+          última acción deben seguir vivos cuando la lista queda vacía. */}
+      <VisitasTabla
+        visitas={lista.data}
+        poll={tab === "activas"}
+        emptyMessage={tab === "activas" ? MESSAGES.emptyActive : MESSAGES.emptyHistory}
+      />
 
       {lista.total > 0 ? (
         <nav aria-label="Paginación" className="flex flex-wrap items-center justify-between gap-3 text-sm">
