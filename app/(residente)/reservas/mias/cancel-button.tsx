@@ -7,7 +7,7 @@ import { MY_RESERVATIONS_MESSAGES } from "@/lib/reservas";
 const initialState: CancelarState = {};
 
 // H8: botón Cancelar con la confirmación de la card.
-export function CancelButton({ id, code }: { id: string; code: string }) {
+export function CancelButton({ id, code, tab }: { id: string; code: string; tab: string }) {
   const [state, formAction, pending] = useActionState(cancelarReserva, initialState);
   return (
     <form
@@ -18,6 +18,7 @@ export function CancelButton({ id, code }: { id: string; code: string }) {
       className="flex flex-col items-start gap-1"
     >
       <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="tab" value={tab} />
       <button
         type="submit"
         disabled={pending}

@@ -133,3 +133,11 @@ export const MY_RESERVATIONS_MESSAGES = {
   cancelled: "Reserva cancelada",
   confirm: (code: string) => `¿Cancelar la reserva ${code}? Esta acción no se puede deshacer.`,
 } as const;
+
+/** Avisos de Mis reservas que llegan por ?aviso= (H8). */
+export const CANCEL_AVISOS = {
+  "reserva-cancelada": "Reserva cancelada",
+  "ya-cancelada": "La reserva ya está cancelada.",
+  "menos-24h": "Solo puedes cancelar con al menos 24 horas de anticipación.",
+  "no-existe": "La reserva no existe.",
+} as const;

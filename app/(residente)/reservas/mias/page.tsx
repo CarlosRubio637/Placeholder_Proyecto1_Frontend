@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/api";
 import { formatDate } from "@/lib/areas";
 import {
+  CANCEL_AVISOS,
   isMyReservationTab,
   MY_RESERVATIONS_MESSAGES,
   MY_RESERVATIONS_PAGE_SIZE,
@@ -73,6 +74,10 @@ export default async function MisReservasPage(props: PageProps<"/reservas/mias">
         <p role="status" className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100">
           {MY_RESERVATIONS_MESSAGES.cancelled}
         </p>
+      ) : typeof query.aviso === "string" && query.aviso in CANCEL_AVISOS ? (
+        <p role="alert" className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+          {CANCEL_AVISOS[query.aviso as keyof typeof CANCEL_AVISOS]}
+        </p>
       ) : null}
 
       <div role="tablist" aria-label="Pestañas de reservas" className="flex gap-2">
@@ -130,7 +135,7 @@ export default async function MisReservasPage(props: PageProps<"/reservas/mias">
                     </td>
                     <td className="px-4 py-3">{reservation.reservedBy}</td>
                     <td className="px-4 py-3">
-                      {reservation.canCancel ? <CancelButton id={reservation.id} code={reservation.code} /> : null}
+                      {reservation.canCancel ? <CancelButton id={reservation.id} code={reservation.code} tab={tab} /> : null}
                     </td>
                   </tr>
                 ))}

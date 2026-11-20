@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import {
   availabilityPath,
+  CANCEL_AVISOS,
   validateReserva,
   type ReservaErrors,
   type ReservaField,
@@ -100,16 +101,30 @@ export async function reservar(
 
 export type CancelarState = { error?: string };
 
-/** H8: PATCH /reservas/:id/cancelar. Con éxito, va al Historial con el aviso. */
+const AVISO_FROM_MESSAGE: Record<string, keyof typeof CANCEL_AVISOS> = {
+  [CANCEL_AVISOS["ya-cancelada"]]: "ya-cancelada",
+  [CANCEL_AVISOS["menos-24h"]]: "menos-24h",
+  [CANCEL_AVISOS["no-existe"]]: "no-existe",
+};
+
+/**
+ * H8: PATCH /reservas/:id/cancelar. Con éxito va al Historial con el aviso.
+ * Un 404 o 409 (otro residente de la unidad ya la canceló, o faltan menos de
+ * 24 h) recarga la lista y muestra el motivo arriba: si se quedara junto al
+ * botón, se perdería al desaparecer la fila.
+ */
 export async function cancelarReserva(
   _prev: CancelarState,
   formData: FormData,
 ): Promise<CancelarState> {
   const id = String(formData.get("id") ?? "");
+  const tab = formData.get("tab") === "historial" ? "historial" : "proximas";
   let res: Response;
   try {
     res = await apiFetch(`reservas/${encodeURIComponent(id)}/cancelar`, { method: "PATCH" });
   } catch (error) {
+    // Deja pasar el redirect() de apiFetch cuando la sesión venció.
+    unstable_rethrow(error);
     console.error("Error al cancelar la reserva:", error);
     return { error: "No se pudo cancelar la reserva. Intenta más tarde." };
   }
@@ -122,8 +137,9 @@ export async function cancelarReserva(
   const body = (await res.json().catch(() => null)) as { message?: unknown } | null;
   const message = firstMessage(body);
   if (res.status === 404 || res.status === 409) {
+    const aviso = (message && AVISO_FROM_MESSAGE[message]) ?? (res.status === 404 ? "no-existe" : "ya-cancelada");
     revalidatePath("/reservas/mias");
-    return { error: message ?? "No se pudo cancelar la reserva." };
+    redirect(`/reservas/mias?${tab === "historial" ? "tab=historial&" : ""}aviso=${aviso}`);
   }
   if (res.status === 403) {
     return { error: "No tienes permiso para esta acción." };
