@@ -10,6 +10,7 @@ import {
   PAQUETES_PATH,
 } from "@/lib/paquetes";
 import { BuscarPaquetes } from "./buscar";
+import { EntregarPaquete } from "./entregar-paquete";
 import { RegistrarPaquete } from "./registrar-paquete";
 
 export const metadata: Metadata = { title: "Paquetería" };
@@ -30,6 +31,7 @@ const linkButtonClass =
 
 // H19: pantalla "Paquetería" del rol SEGURIDAD. Lista paquetes pendientes del
 // día, con búsqueda y paginación, y abre el formulario de registro.
+// H21: cada fila pendiente tiene el botón "Entregar".
 export default async function PaquetesPage(
   props: PageProps<"/seguridad/paquetes">,
 ) {
@@ -40,6 +42,8 @@ export default async function PaquetesPage(
   const requestedPage = parsePage(first(searchParams.page));
   const search = first(searchParams.search)?.trim() ?? "";
   const aviso = first(searchParams.aviso)?.trim();
+  // H21: aviso de error, por ejemplo cuando otro agente ya entregó el paquete.
+  const alerta = first(searchParams.alerta)?.trim();
 
   // Torres y lista de paquetes en paralelo; si falla una, el error.tsx la
   // muestra. La lista pide por defecto solo los pendientes.
@@ -86,6 +90,15 @@ export default async function PaquetesPage(
         </p>
       ) : null}
 
+      {alerta ? (
+        <p
+          role="alert"
+          className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
+        >
+          {alerta}
+        </p>
+      ) : null}
+
       <BuscarPaquetes defaultValue={search} />
 
       {lista.data.length === 0 ? (
@@ -109,6 +122,9 @@ export default async function PaquetesPage(
                 <th scope="col" className={thClass}>Guía</th>
                 <th scope="col" className={thClass}>Recibido</th>
                 <th scope="col" className={thClass}>Observaciones</th>
+                <th scope="col" className={thClass}>
+                  <span className="sr-only">Acciones</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -120,6 +136,25 @@ export default async function PaquetesPage(
                   <td className={`${tdClass} whitespace-nowrap`}>{paquete.trackingNumber ?? "—"}</td>
                   <td className={`${tdClass} whitespace-nowrap`}>{formatRecibido(paquete.receivedAt)}</td>
                   <td className={`${tdClass} max-w-sm break-words`}>{paquete.notes ?? "—"}</td>
+                  <td className={tdClass}>
+                    {/* Sin text-right en la celda: el <dialog> sigue siendo hijo
+                        de la celda en el DOM y heredaría la alineación. */}
+                    <div className="flex justify-end">
+                      {paquete.status === "PENDIENTE_ENTREGA" ? (
+                        <EntregarPaquete
+                          paquete={{
+                            id: paquete.id,
+                            code: paquete.code,
+                            unitCode: paquete.unit.code,
+                            courier: paquete.courier,
+                            trackingNumber: paquete.trackingNumber,
+                            notes: paquete.notes,
+                            recibido: formatRecibido(paquete.receivedAt),
+                          }}
+                        />
+                      ) : null}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
