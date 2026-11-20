@@ -141,8 +141,13 @@ export function readVisitaValues(formData: FormData): VisitaValues {
   });
 }
 
-/** Errores por campo de valores ya limpios (cleanValues). Vacío si todo es válido. */
-export function validateVisita(values: VisitaValues, nowMs: number = Date.now()): VisitaErrors {
+/**
+ * Nombre, documento y motivo del visitante. Las comparten H14 (esta pantalla)
+ * y H16 (solicitudes de portería).
+ */
+export function validateVisitante(
+  values: Pick<VisitaValues, "visitorName" | "documentType" | "documentNumber" | "reason">,
+): VisitaErrors {
   const errors: VisitaErrors = {};
   const { length } = values.visitorName;
   if (length < LIMITS.nameMin || length > LIMITS.nameMax || !NAME_REGEX.test(values.visitorName)) {
@@ -157,6 +162,17 @@ export function validateVisita(values: VisitaValues, nowMs: number = Date.now())
     errors.documentType = MESSAGES.documentType;
   }
 
+  const reasonLength = values.reason.length;
+  if (reasonLength < LIMITS.reasonMin || reasonLength > LIMITS.reasonMax) {
+    errors.reason = MESSAGES.reason;
+  }
+  return errors;
+}
+
+/** Errores por campo de valores ya limpios (cleanValues). Vacío si todo es válido. */
+export function validateVisita(values: VisitaValues, nowMs: number = Date.now()): VisitaErrors {
+  const errors: VisitaErrors = validateVisitante(values);
+
   const now = svNow(nowMs);
   const limit = addDays(now.date, LIMITS.maxDaysAhead);
   if (!DATE_ONLY.test(values.visitDate) || values.visitDate < now.date || values.visitDate > limit) {
@@ -167,11 +183,6 @@ export function validateVisita(values: VisitaValues, nowMs: number = Date.now())
     errors.expectedTime = MESSAGES.hours;
   } else if (values.visitDate === now.date && values.expectedTime < now.time) {
     errors.expectedTime = MESSAGES.timePassed;
-  }
-
-  const reasonLength = values.reason.length;
-  if (reasonLength < LIMITS.reasonMin || reasonLength > LIMITS.reasonMax) {
-    errors.reason = MESSAGES.reason;
   }
   return errors;
 }
