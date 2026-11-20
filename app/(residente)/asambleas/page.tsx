@@ -27,7 +27,16 @@ export default async function AsambleasActivasPage() {
             Vota por tu unidad en las asambleas abiertas. Tu voto es definitivo y secreto, y cuenta uno por unidad en cada tema.
           </p>
         </div>
-        <Actualizar />
+        <div className="flex flex-wrap items-center gap-2">
+          {/* H24: acceso al historial de asambleas cerradas y sus resultados. */}
+          <Link
+            href={`${ASAMBLEAS_PATH}/cerradas`}
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700"
+          >
+            Asambleas cerradas
+          </Link>
+          <Actualizar />
+        </div>
       </div>
 
       {data.length === 0 ? (
