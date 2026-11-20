@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireRole } from "@/lib/api";
-import { fetchIncident } from "@/lib/incidencias-api";
+import { requireAnyRole } from "@/lib/api";
+import { fetchIncident, fetchStaff } from "@/lib/incidencias-api";
 import { describeEvent, formatDateTime, locationLabel } from "@/lib/incidencias";
-import { PriorityBadge, StatusBadge } from "../_components/badges";
-import { PhotoGallery } from "../_components/photo-gallery";
-import { RefreshButton } from "../_components/refresh-button";
+import { PriorityBadge, StatusBadge } from "@/app/_components/incidencias/badges";
+import { PhotoGallery } from "@/app/_components/incidencias/photo-gallery";
+import { RefreshButton } from "@/app/_components/incidencias/refresh-button";
+import { GestionPanel } from "./gestion-panel";
 
 export const metadata: Metadata = {
   title: "Detalle de incidencia",
@@ -15,20 +16,28 @@ const NUMBER_REGEX = /^INC-\d{4}-\d{5}$/;
 
 // H11: detalle de una incidencia de la unidad, con fotos, responsable e
 // historial. H10 redirige aquí con ?registrada=<número> después de registrar.
+// H12: el Administrador entra a la misma pantalla y ve el panel "Gestión".
 export default async function DetalleIncidenciaPage(props: PageProps<"/incidencias/[id]">) {
-  const user = await requireRole("RESIDENTE");
+  const user = await requireAnyRole(["RESIDENTE", "ADMINISTRADOR"]);
   if (!user) return null;
+  const isAdmin = user.role === "ADMINISTRADOR";
+  const back = isAdmin
+    ? { href: "/admin/incidencias", label: "Incidencias" }
+    : { href: "/incidencias", label: "Mis incidencias" };
 
   const { id } = await props.params;
   const { registrada } = await props.searchParams;
-  const incident = await fetchIncident(id);
+  const [incident, staff] = await Promise.all([
+    fetchIncident(id),
+    isAdmin ? fetchStaff() : Promise.resolve([]),
+  ]);
 
   if (!incident) {
     return (
       <div className="flex flex-col items-start gap-3">
         <p className="text-lg font-medium">La incidencia no existe.</p>
-        <Link href="/incidencias" className="underline underline-offset-4">
-          Volver a Mis incidencias
+        <Link href={back.href} className="underline underline-offset-4">
+          Volver a {back.label}
         </Link>
       </div>
     );
@@ -50,8 +59,8 @@ export default async function DetalleIncidenciaPage(props: PageProps<"/incidenci
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Link href="/incidencias" className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400">
-            ← Mis incidencias
+          <Link href={back.href} className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400">
+            ← {back.label}
           </Link>
           <p className="text-sm tabular-nums text-zinc-500">{incident.number}</p>
           <h1 className="text-2xl font-semibold">{incident.title}</h1>
@@ -88,6 +97,16 @@ export default async function DetalleIncidenciaPage(props: PageProps<"/incidenci
           <dd className="mt-0.5 whitespace-pre-line">{incident.description}</dd>
         </div>
       </dl>
+
+      {isAdmin ? (
+        <GestionPanel
+          incidentId={incident.id}
+          priority={incident.priority}
+          assigneeId={incident.assignee?.id ?? null}
+          resolved={incident.status === "RESUELTO"}
+          staff={staff}
+        />
+      ) : null}
 
       {incident.photos.length > 0 ? (
         <section className="flex flex-col gap-3">
