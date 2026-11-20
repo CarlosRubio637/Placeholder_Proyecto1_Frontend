@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import {
   onlyDigits,
@@ -77,7 +77,9 @@ export async function pagarCuota(_prev: PagoState, formData: FormData): Promise<
         holderName: values.holderName.trim().replace(/\s+/g, " "),
       }),
     });
-  } catch {
+  } catch (error) {
+    // Deja pasar el redirect() de apiFetch cuando la sesión venció.
+    unstable_rethrow(error);
     // Sin el error: podría incluir el cuerpo con la tarjeta.
     console.error("Error de red al pagar la cuota", feeId);
     return { formError: PAY_MESSAGES.serverError };

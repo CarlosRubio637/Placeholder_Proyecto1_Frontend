@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireRole } from "@/lib/api";
 import { formatDateTime } from "@/lib/estado-cuenta";
 import { fetchAdminUnit, fetchUnitStatement } from "@/lib/estado-cuenta-api";
@@ -32,6 +32,10 @@ export default async function UnidadAdminPage(props: PageProps<"/admin/unidades/
   if (!unit || !statement) notFound();
   const units = await getUnidades(unit.tower.id);
   const base = `/admin/unidades/${unit.id}`;
+  const lastPage = Math.max(1, Math.ceil(statement.total / statement.pageSize));
+  if (statement.total > 0 && filters.page > lastPage) {
+    redirect(statementHref(base, filters, lastPage));
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -45,7 +49,7 @@ export default async function UnidadAdminPage(props: PageProps<"/admin/unidades/
         <RegenerateCode unitId={unit.id} code={unit.registrationCode} />
         <p className="text-xs text-zinc-500">
           {unit.registrationCodeUpdatedAt
-            ? `Regenerado el ${formatDateTime(unit.registrationCodeUpdatedAt)}.`
+            ? `Regenerado el ${formatDateTime(unit.registrationCodeUpdatedAt)}`
             : "Código original de los datos iniciales."}
         </p>
       </section>

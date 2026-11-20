@@ -1,22 +1,13 @@
 import Link from "next/link";
 import {
-  FEE_STATUS_LABEL,
   formatDay,
   formatMoney,
-  periodLabel,
   STATEMENT_MESSAGES,
   type AccountStatement,
-  type FeeStatus,
 } from "@/lib/estado-cuenta";
-import { FeePayments } from "./fee-payments";
+import { FeeRow } from "./fee-row";
 import { RefreshButton } from "./refresh-button";
 import { StatementFilters } from "./statement-filters";
-
-const STATUS_STYLE: Record<FeeStatus, string> = {
-  PENDIENTE: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  PAGADO: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  MOROSO: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
-};
 
 type Props = {
   statement: AccountStatement;
@@ -86,32 +77,7 @@ export function StatementView({ statement, readOnly, filtered, pageHref }: Props
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                 {data.map((fee) => (
-                  <tr key={fee.id} className="align-top">
-                    <td className="px-4 py-3 whitespace-nowrap capitalize">{periodLabel(fee.period)}</td>
-                    <td className="px-4 py-3">{fee.concept}</td>
-                    <td className="px-4 py-3 whitespace-nowrap tabular-nums">{formatMoney(fee.amount)}</td>
-                    <td className="px-4 py-3 whitespace-nowrap tabular-nums">{formatDay(fee.dueDate)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[fee.status]}`}>
-                        {FEE_STATUS_LABEL[fee.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <FeePayments feeId={fee.id} colSpan={columns} />
-                    </td>
-                    {readOnly ? null : (
-                      <td className="px-4 py-3">
-                        {fee.status !== "PAGADO" ? (
-                          <Link
-                            href={`/cuotas/${fee.id}/pagar`}
-                            className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background"
-                          >
-                            Pagar
-                          </Link>
-                        ) : null}
-                      </td>
-                    )}
-                  </tr>
+                  <FeeRow key={fee.id} fee={fee} readOnly={readOnly} columns={columns} />
                 ))}
               </tbody>
             </table>
