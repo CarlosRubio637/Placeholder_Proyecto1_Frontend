@@ -108,6 +108,7 @@ export default async function ReporteAreasPage(props: PageProps<"/admin/reportes
       {/* key: al cambiar la URL (atrás, adelante) el formulario toma el periodo nuevo. */}
       <FiltrosPeriodo
         key={`${periodo}|${desde}|${hasta}`}
+        reporte="areas"
         path={REPORTE_AREAS_PATH}
         ayuda="por fecha de la reserva"
         periodo={periodo}

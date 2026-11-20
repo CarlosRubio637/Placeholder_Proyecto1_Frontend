@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { MAX_RANGE_DAYS, morosidadHref, validateRango } from "@/lib/validation/morosidad";
+import { ExportarReporte } from "../_components/exportar-reporte";
 
 const inputClass =
   "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:border-zinc-100";
@@ -13,7 +14,8 @@ const buttonClass =
 const DEBOUNCE_MS = 400;
 
 // Filtro de rango (H32): consulta al cambiar a un rango válido, sin botón
-// Consultar. Actualizar vuelve a pedir los datos; Exportar es de H36.
+// Consultar. Actualizar vuelve a pedir los datos; Exportar (H36) usa el rango
+// que se está mostrando.
 export function FiltrosMorosidad({ desde, hasta }: { desde: string; hasta: string }) {
   const router = useRouter();
   const [values, setValues] = useState({ desde, hasta });
@@ -89,13 +91,7 @@ export function FiltrosMorosidad({ desde, hasta }: { desde: string; hasta: strin
         <button type="button" onClick={refresh} disabled={pending} className={buttonClass}>
           Actualizar
         </button>
-        {/* H36 activa la exportación con los filtros actuales. */}
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar PDF
-        </button>
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar CSV
-        </button>
+        <ExportarReporte reporte="morosidad" filtros={{ from: desde, to: hasta }} />
       </div>
     </div>
   );
