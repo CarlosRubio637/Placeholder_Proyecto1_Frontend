@@ -1,0 +1,120 @@
+import { apiFetch } from "@/lib/api";
+
+// Tipos y consultas de paquetería (H19 y H20). Solo para Server Components y
+// Server Functions: usa apiFetch, que lee la cookie de sesión.
+
+export const PAQUETES_PATH = "/seguridad/paquetes";
+export const MIS_PAQUETES_PATH = "/paquetes";
+export const PAGE_SIZE = 20;
+export const MIS_PAQUETES_PAGE_SIZE = 10;
+
+export type PackageStatus = "PENDIENTE_ENTREGA" | "ENTREGADO";
+
+export type Torre = { id: string; name: string; letter: string };
+export type UnidadRef = { id: string; code: string };
+/** residentCount: residentes activos (H16); H19 no lo usa. */
+export type Unidad = UnidadRef & { number: string; residentCount: number };
+
+// ----------------- H19 -----------------
+
+export type Paquete = {
+  id: string;
+  code: string;
+  unit: UnidadRef;
+  courier: string;
+  trackingNumber: string | null;
+  notes: string | null;
+  status: PackageStatus;
+  receivedAt: string;
+};
+
+export type PaqueteLista = {
+  data: Paquete[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export async function getTorres(): Promise<Torre[]> {
+  const res = await apiFetch("torres");
+  if (!res.ok) throw new Error(`GET torres respondió ${res.status}`);
+  return res.json();
+}
+
+export async function getUnidades(towerId: string): Promise<Unidad[]> {
+  const res = await apiFetch(`unidades?towerId=${encodeURIComponent(towerId)}`);
+  if (!res.ok) throw new Error(`GET unidades respondió ${res.status}`);
+  return res.json();
+}
+
+export type PaquetesFiltros = {
+  status?: PackageStatus;
+  page: number;
+  search?: string;
+};
+
+export async function getPaquetes(filtros: PaquetesFiltros): Promise<PaqueteLista> {
+  const params = new URLSearchParams();
+  if (filtros.status) params.set("status", filtros.status);
+  if (filtros.search) params.set("search", filtros.search);
+  params.set("page", String(filtros.page));
+  params.set("pageSize", String(PAGE_SIZE));
+  const res = await apiFetch(`seguridad/paquetes?${params.toString()}`);
+  if (!res.ok) throw new Error(`GET paquetes respondió ${res.status}`);
+  return res.json();
+}
+
+// ----------------- H20 -----------------
+
+export type MiPaquete = {
+  id: string;
+  code: string;
+  courier: string;
+  trackingNumber: string | null;
+  notes: string | null;
+  receivedAt: string;
+  daysWaiting: number;
+  deliveredAt: string | null;
+  pickedUpByName: string | null;
+  pickedUpByDocLast4: string | null;
+};
+
+export type MisPaquetesLista = {
+  pendingCount: number;
+  data: MiPaquete[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export async function getMisPaquetes(
+  status: PackageStatus,
+  page: number,
+): Promise<MisPaquetesLista> {
+  const params = new URLSearchParams();
+  params.set("status", status);
+  params.set("page", String(page));
+  params.set("pageSize", String(MIS_PAQUETES_PAGE_SIZE));
+  const res = await apiFetch(`paquetes/mios?${params.toString()}`);
+  if (!res.ok) throw new Error(`GET paquetes/mios respondió ${res.status}`);
+  return res.json();
+}
+
+// ----------------- Formato de fechas -----------------
+
+// DD/MM/AAAA HH:mm, en hora de El Salvador.
+const formatter = new Intl.DateTimeFormat("es-SV", {
+  timeZone: "America/El_Salvador",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+export function formatRecibido(iso: string): string {
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return "—";
+  return formatter.format(ms).replace(", ", " ");
+}

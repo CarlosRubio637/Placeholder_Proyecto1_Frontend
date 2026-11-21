@@ -1,0 +1,214 @@
+import { LOCATIONS } from "@/lib/validation/incidencia";
+
+// Tipos y etiquetas del módulo de incidencias (H10-H13). Deben coincidir con
+// las respuestas del backend (IncidentListDto, IncidentDetailDto).
+
+export const STATUSES = ["PENDIENTE", "EN_PROCESO", "RESUELTO"] as const;
+export type IncidentStatus = (typeof STATUSES)[number];
+export type IncidentPriority = "BAJA" | "MEDIA" | "ALTA";
+export type IncidentEventType = "CREACION" | "ESTADO" | "PRIORIDAD" | "ASIGNACION";
+
+export const STATUS_LABELS: Record<IncidentStatus, string> = {
+  PENDIENTE: "Pendiente",
+  EN_PROCESO: "En proceso",
+  RESUELTO: "Resuelto",
+};
+
+export const PRIORITY_LABELS: Record<IncidentPriority, string> = {
+  BAJA: "Baja",
+  MEDIA: "Media",
+  ALTA: "Alta",
+};
+
+export function isStatus(value: unknown): value is IncidentStatus {
+  return typeof value === "string" && (STATUSES as readonly string[]).includes(value);
+}
+
+export function locationLabel(value: string): string {
+  return LOCATIONS.find((option) => option.value === value)?.label ?? value;
+}
+
+export type IncidentListItem = {
+  id: string;
+  number: string;
+  title: string;
+  location: string;
+  status: IncidentStatus;
+  priority: IncidentPriority;
+  createdAt: string;
+};
+
+export type IncidentList = {
+  data: IncidentListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type IncidentEvent = {
+  id: string;
+  type: IncidentEventType;
+  fromStatus: IncidentStatus | null;
+  toStatus: IncidentStatus | null;
+  fromValue: string | null;
+  toValue: string | null;
+  note: string | null;
+  authorLabel: string;
+  createdAt: string;
+};
+
+export type IncidentDetail = {
+  id: string;
+  number: string;
+  title: string;
+  description: string;
+  location: string;
+  locationDetail: string | null;
+  status: IncidentStatus;
+  priority: IncidentPriority;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  unit: { code: string };
+  assignee: { id: string; name: string; specialty: string } | null;
+  photos: { id: string; url: string }[];
+  events: IncidentEvent[];
+};
+
+/** Prioridad tal como llega en fromValue/toValue ("ALTA") → "Alta". */
+function priorityText(value: string | null): string {
+  if (!value) return "—";
+  return PRIORITY_LABELS[value as IncidentPriority] ?? value;
+}
+
+/** Texto de la columna "Cambio" del historial. */
+export function describeEvent(event: IncidentEvent): string {
+  switch (event.type) {
+    case "CREACION":
+      return `Registrada · ${STATUS_LABELS[event.toStatus ?? "PENDIENTE"]}`;
+    case "ESTADO":
+      return `${event.fromStatus ? STATUS_LABELS[event.fromStatus] : "—"} → ${
+        event.toStatus ? STATUS_LABELS[event.toStatus] : "—"
+      }`;
+    case "PRIORIDAD":
+      return `Prioridad: ${priorityText(event.fromValue)} → ${priorityText(event.toValue)}`;
+    case "ASIGNACION":
+      return `Responsable: ${event.fromValue ?? "Sin asignar"} → ${event.toValue ?? "Sin asignar"}`;
+  }
+}
+
+const DATE_TIME = new Intl.DateTimeFormat("es-SV", {
+  timeZone: "America/El_Salvador",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const DATE = new Intl.DateTimeFormat("es-SV", {
+  timeZone: "America/El_Salvador",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+/** "06/11/2026, 10:42 a. m." en la hora del condominio. */
+export function formatDateTime(iso: string): string {
+  return DATE_TIME.format(new Date(iso));
+}
+
+/** "06/11/2026" en la hora del condominio. */
+export function formatDate(iso: string): string {
+  return DATE.format(new Date(iso));
+}
+
+// ----------------- H12: bandeja del administrador -----------------
+
+export const PRIORITIES = ["ALTA", "MEDIA", "BAJA"] as const;
+
+export function isPriority(value: unknown): value is IncidentPriority {
+  return typeof value === "string" && (PRIORITIES as readonly string[]).includes(value);
+}
+
+export function isLocation(value: unknown): value is string {
+  return typeof value === "string" && LOCATIONS.some((option) => option.value === value);
+}
+
+/** Máximo de la búsqueda por número o título (H12). */
+export const ADMIN_SEARCH_MAX = 80;
+
+export type AdminIncidentItem = {
+  id: string;
+  number: string;
+  title: string;
+  unitCode: string;
+  location: string;
+  status: IncidentStatus;
+  priority: IncidentPriority;
+  assignee: { id: string; name: string } | null;
+  daysOpen: number;
+  createdAt: string;
+};
+
+export type AdminIncidentList = {
+  data: AdminIncidentItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type MaintenanceStaff = {
+  id: string;
+  name: string;
+  specialty: string;
+  phone: string;
+};
+
+/** Filtros de la bandeja; viajan en la URL. `assignee`: uuid o "none". */
+export type AdminFilters = {
+  status?: IncidentStatus;
+  priority?: IncidentPriority;
+  location?: string;
+  assignee?: string;
+  search?: string;
+};
+
+export const GESTION_MESSAGES = {
+  saved: "Cambios guardados",
+  noChanges: "No hay cambios para guardar.",
+  resolved: "La incidencia está resuelta. Reábrela para modificarla.",
+} as const;
+
+/** "Hoy", "1 día", "5 días". */
+export function daysLabel(days: number): string {
+  if (days === 0) return "Hoy";
+  return days === 1 ? "1 día" : `${days} días`;
+}
+
+// ----------------- H13: cambio de estado -----------------
+
+export const NOTE_LIMITS = { min: 10, max: 500 } as const;
+
+export const ESTADO_MESSAGES = {
+  note: "Escribe una observación de 10 a 500 caracteres.",
+  saved: "Estado actualizado",
+  confirm: (number: string, status: IncidentStatus) =>
+    `¿Cambiar la incidencia ${number} a ${STATUS_LABELS[status]}?`,
+} as const;
+
+/** El único cambio permitido desde cada estado (tabla de estados de H13). */
+export const TRANSITIONS: Record<
+  IncidentStatus,
+  { to: IncidentStatus; action: string; noteLabel: string }
+> = {
+  PENDIENTE: { to: "EN_PROCESO", action: "Iniciar atención", noteLabel: "Trabajo que inicia" },
+  EN_PROCESO: { to: "RESUELTO", action: "Marcar como resuelta", noteLabel: "Acciones realizadas" },
+  RESUELTO: { to: "EN_PROCESO", action: "Reabrir", noteLabel: "Motivo de la reapertura" },
+};
+
+/** Valida la observación ya recortada; undefined si es válida. */
+export function validateNote(note: string): string | undefined {
+  const { length } = note.trim();
+  return length < NOTE_LIMITS.min || length > NOTE_LIMITS.max ? ESTADO_MESSAGES.note : undefined;
+}
