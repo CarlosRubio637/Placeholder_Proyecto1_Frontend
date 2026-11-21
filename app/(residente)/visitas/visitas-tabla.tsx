@@ -110,7 +110,10 @@ export function VisitasTabla({ visitas, poll, emptyMessage }: Props) {
                   <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{formatFecha(visita.visitDate)}</td>
                   <td className={`${tdClass} whitespace-nowrap tabular-nums`}>{horaLabel(visita)}</td>
                   <td className={`${tdClass} max-w-xs break-words`}>{visita.reason}</td>
-                  <td className={`${tdClass} whitespace-nowrap font-mono`}>{visita.code ?? "—"}</td>
+                  <td className={`${tdClass} whitespace-nowrap`}>
+                    {/* Sin código, la raya va en la fuente normal, igual que en Hora. */}
+                    {visita.code ? <span className="font-mono">{visita.code}</span> : "—"}
+                  </td>
                   <td className={tdClass}>
                     <p className="font-medium">{STATUS_LABELS[visita.status]}</p>
                     {visita.status === "PENDIENTE_AUTORIZACION" && visita.expiresAt ? (
