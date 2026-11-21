@@ -5,6 +5,8 @@ import { FiltrosPeriodo } from "../_components/filtros-periodo";
 // todos los reportes (H33); aquí solo se fija la ruta y la ayuda.
 export function FiltrosIncidencias(props: { periodo: Periodo; desde: string; hasta: string }) {
   return (
-    <FiltrosPeriodo path={REPORTE_INCIDENCIAS_PATH} ayuda="por fecha de creación" {...props} />
+    <FiltrosPeriodo
+      reporte="incidencias"
+      path={REPORTE_INCIDENCIAS_PATH} ayuda="por fecha de creación" {...props} />
   );
 }

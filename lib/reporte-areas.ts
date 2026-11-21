@@ -64,11 +64,6 @@ export async function getReporteAreas(desde: string, hasta: string): Promise<Rep
 
 const numberFormat = new Intl.NumberFormat("es-SV", { maximumFractionDigits: 1 });
 
-/** 3.6 → "3.6 %". */
-export function formatPct(value: number): string {
-  return `${numberFormat.format(value)} %`;
-}
-
 /** 14 → "14 h"; 1.5 → "1.5 h". */
 export function formatHoras(value: number): string {
   return `${numberFormat.format(value)} h`;
