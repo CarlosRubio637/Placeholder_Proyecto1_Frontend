@@ -11,7 +11,8 @@ function button(name: string) {
 function fileResponse(disposition: string | null) {
   const headers = new Headers({ "Content-Type": "application/pdf" });
   if (disposition) headers.set("Content-Disposition", disposition);
-  return new Response(new Blob(["%PDF-"]), { status: 200, headers });
+  // Cuerpo como texto: el Response de Node 22 no sabe leer el Blob de jsdom.
+  return new Response("%PDF-", { status: 200, headers });
 }
 
 describe("H36. Botones Exportar PDF y Exportar CSV", () => {
