@@ -12,8 +12,10 @@ Este repositorio contiene el frontend. El backend y la documentación completa d
 
 | Componente | URL |
 |---|---|
-| Frontend | Se publica con la versión 1.0.0 |
-| Documentación de la API (Swagger) | Se publica con la versión 1.0.0 |
+| Frontend | https://placeholder-proyecto1-frontend.vercel.app |
+| Documentación de la API (Swagger) | https://placeholderproyecto1backend-production.up.railway.app/api/docs |
+
+El backend está en Railway y el frontend en Vercel, ambos desplegados desde `main`.
 
 Los usuarios de prueba se entregan en Moodle, no en este repositorio.
 
