@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/api";
 import { fetchMyIncidents, PAGE_SIZE } from "@/lib/incidencias-api";
 import { formatDate, isStatus, locationLabel } from "@/lib/incidencias";
-import { PriorityBadge, StatusBadge } from "./_components/badges";
-import { RefreshButton } from "./_components/refresh-button";
-import { StatusFilter } from "./_components/status-filter";
+import { PriorityBadge, StatusBadge } from "@/app/_components/incidencias/badges";
+import { RefreshButton } from "@/app/_components/incidencias/refresh-button";
+import { StatusFilter } from "@/app/_components/incidencias/status-filter";
 
 export const metadata: Metadata = {
   title: "Mis incidencias",

@@ -35,7 +35,7 @@ export function isIsoDate(value: string | undefined): value is string {
 }
 
 /** La misma fecha `months` meses antes; si ese día no existe, el último del mes. */
-function monthsBefore(isoDate: string, months: number): string {
+export function monthsBefore(isoDate: string, months: number): string {
   const [year, month, day] = isoDate.split("-").map(Number);
   const target = new Date(Date.UTC(year, month - 1 - months, 1));
   const lastDay = new Date(
