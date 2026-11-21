@@ -7,7 +7,7 @@ import { AVISO_PARAMS, DENTRO_PATH, DENTRO_SEARCH_MAX } from "@/lib/dentro-clien
 type Torre = { id: string; name: string };
 
 const fieldClass =
-  "rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 // Filtros de "Quién está dentro" (H18): torre y búsqueda por nombre o
 // documento. Viven en la URL; al cambiar vuelven a la página 1.

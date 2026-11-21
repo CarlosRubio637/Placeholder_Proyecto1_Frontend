@@ -31,7 +31,7 @@ const empty: EntregaValues = {
 };
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 const secondaryButtonClass =
   "rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium dark:border-zinc-700";
 
@@ -101,7 +101,7 @@ export function EntregarPaquete({ paquete }: { paquete: PaqueteEntrega }) {
         type="button"
         onClick={open}
         aria-label={`Entregar el paquete ${paquete.code}`}
-        className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background"
+        className="rounded-md bg-primary hover:bg-primary-hover px-3 py-1.5 text-sm font-medium text-primary-foreground"
       >
         Entregar
       </button>
@@ -146,7 +146,7 @@ export function EntregarPaquete({ paquete }: { paquete: PaqueteEntrega }) {
               <button
                 type="button"
                 onClick={confirm}
-                className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background"
+                className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground"
               >
                 Entregar
               </button>
@@ -231,7 +231,7 @@ export function EntregarPaquete({ paquete }: { paquete: PaqueteEntrega }) {
               <button
                 type="submit"
                 disabled={hasErrors || pending}
-                className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {pending ? "Procesando…" : "Confirmar entrega"}
               </button>

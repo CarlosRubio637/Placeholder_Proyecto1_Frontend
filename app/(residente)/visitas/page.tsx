@@ -47,7 +47,7 @@ export default async function MisVisitasPage(props: PageProps<"/visitas">) {
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Unidad {user.unit.code}</p>
           ) : null}
         </div>
-        <Link href="/visitas/nueva" className="rounded-md bg-foreground px-4 py-2 font-medium text-background">
+        <Link href="/visitas/nueva" className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground">
           Autorizar visita
         </Link>
       </div>

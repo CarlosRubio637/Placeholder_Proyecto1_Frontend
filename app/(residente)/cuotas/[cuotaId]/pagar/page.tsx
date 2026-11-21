@@ -52,7 +52,7 @@ export default async function PagarCuotaPage(props: PageProps<"/cuotas/[cuotaId]
       {fee.status === "PAGADO" ? (
         <div className="flex flex-col items-start gap-3">
           <p role="status" className="font-medium">{PAY_MESSAGES.alreadyPaid}</p>
-          <Link href="/estado-de-cuenta" className="rounded-md bg-foreground px-4 py-2 font-medium text-background">
+          <Link href="/estado-de-cuenta" className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground">
             Ver estado de cuenta
           </Link>
         </div>

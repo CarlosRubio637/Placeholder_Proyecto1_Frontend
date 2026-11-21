@@ -70,7 +70,7 @@ export function FeeRow({ fee, readOnly, columns }: { fee: StatementFee; readOnly
             {fee.status !== "PAGADO" ? (
               <Link
                 href={`/cuotas/${fee.id}/pagar`}
-                className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background"
+                className="rounded-md bg-primary hover:bg-primary-hover px-3 py-1.5 text-sm font-medium text-primary-foreground"
               >
                 Pagar
               </Link>

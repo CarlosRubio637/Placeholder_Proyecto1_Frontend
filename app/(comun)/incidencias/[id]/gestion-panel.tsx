@@ -143,7 +143,7 @@ export function GestionPanel({ incidentId, priority, assigneeId, resolved, staff
           <button
             type="submit"
             disabled={!changed || pending || resolved}
-            className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Guardando…" : "Guardar"}
           </button>

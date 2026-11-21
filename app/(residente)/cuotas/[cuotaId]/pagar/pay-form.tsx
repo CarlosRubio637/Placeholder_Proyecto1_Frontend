@@ -25,7 +25,7 @@ function todaySV(): string {
 }
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 // H1: datos de la tarjeta. Viven solo en el estado local y se pierden al salir.
 // La llave de idempotencia se genera al abrir la pantalla; un doble clic o un
@@ -59,7 +59,7 @@ export function PayForm({ feeId, amount }: { feeId: string; amount: number }) {
     return (
       <div className="flex flex-col items-start gap-3">
         <p role="alert" className="font-medium">{PAY_MESSAGES.alreadyPaid}</p>
-        <Link href="/estado-de-cuenta" className="rounded-md bg-foreground px-4 py-2 font-medium text-background">
+        <Link href="/estado-de-cuenta" className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground">
           Ver estado de cuenta
         </Link>
       </div>
@@ -128,7 +128,7 @@ export function PayForm({ feeId, amount }: { feeId: string; amount: number }) {
         <button
           type="submit"
           disabled={pending || hasErrors}
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:opacity-60"
+          className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground transition-opacity disabled:opacity-60"
         >
           {pending ? PAY_MESSAGES.processing : `Pagar ${formatMoney(amount)}`}
         </button>
