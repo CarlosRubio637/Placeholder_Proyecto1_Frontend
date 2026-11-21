@@ -103,3 +103,41 @@ export function addDaysIso(iso: string, days: number): string {
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
 }
+
+/** Pestañas de Mis reservas (H8). */
+export const MY_RESERVATION_TABS = ["proximas", "historial"] as const;
+export type MyReservationTab = (typeof MY_RESERVATION_TABS)[number];
+export const MY_RESERVATIONS_PAGE_SIZE = 10;
+
+export function isMyReservationTab(value: unknown): value is MyReservationTab {
+  return typeof value === "string" && (MY_RESERVATION_TABS as readonly string[]).includes(value);
+}
+
+/** Fila de GET /reservas/mias (H8). */
+export type MyReservation = {
+  id: string;
+  code: string;
+  area: { id: string; name: string };
+  date: string;
+  startTime: string;
+  endTime: string;
+  attendees: number;
+  status: Reservation["status"];
+  reservedBy: string;
+  canCancel: boolean;
+};
+
+export const MY_RESERVATIONS_MESSAGES = {
+  emptyUpcoming: "No tienes reservas próximas.",
+  emptyHistory: "No hay reservas en tu historial.",
+  cancelled: "Reserva cancelada",
+  confirm: (code: string) => `¿Cancelar la reserva ${code}? Esta acción no se puede deshacer.`,
+} as const;
+
+/** Avisos de Mis reservas que llegan por ?aviso= (H8). */
+export const CANCEL_AVISOS = {
+  "reserva-cancelada": "Reserva cancelada",
+  "ya-cancelada": "La reserva ya está cancelada.",
+  "menos-24h": "Solo puedes cancelar con al menos 24 horas de anticipación.",
+  "no-existe": "La reserva no existe.",
+} as const;
