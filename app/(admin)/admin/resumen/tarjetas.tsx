@@ -39,17 +39,19 @@ function Tarjeta({
   );
 }
 
-function Cifra({ label, value }: { label: string; value: React.ReactNode }) {
+function SinDatos() {
+  return <p className="text-sm text-zinc-600 dark:text-zinc-400">{SIN_DATOS}</p>;
+}
+
+// Una cifra con su etiqueta; sin valor (null) muestra "Sin datos" con el
+// texto normal, no con el tamaño de una cifra.
+function Cifra({ label, value }: { label: string; value: React.ReactNode | null }) {
   return (
     <div>
       <p className={labelClass}>{label}</p>
-      <p className={valueClass}>{value}</p>
+      {value === null ? <SinDatos /> : <p className={valueClass}>{value}</p>}
     </div>
   );
-}
-
-function SinDatos() {
-  return <p className="text-sm text-zinc-600 dark:text-zinc-400">{SIN_DATOS}</p>;
 }
 
 // Las cuatro tarjetas del resumen (H37), cada una con su enlace al reporte
@@ -76,10 +78,10 @@ export function Tarjetas({ resumen }: { resumen: Resumen }) {
             <Cifra
               label="Ocupación promedio"
               value={
-                areas.avgOccupancyPct === null ? SIN_DATOS : formatPorcentaje(areas.avgOccupancyPct)
+                areas.avgOccupancyPct === null ? null : formatPorcentaje(areas.avgOccupancyPct)
               }
             />
-            <Cifra label="Área más usada" value={areas.mostUsed?.name ?? SIN_DATOS} />
+            <Cifra label="Área más usada" value={areas.mostUsed?.name ?? null} />
           </>
         )}
       </Tarjeta>

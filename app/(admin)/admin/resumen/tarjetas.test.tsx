@@ -67,7 +67,8 @@ describe("H37. Resumen del condominio", () => {
     );
 
     expect(tarjeta("Áreas comunes").getByText("0.0 %")).toBeTruthy();
-    expect(tarjeta("Áreas comunes").getByText("Sin datos")).toBeTruthy();
+    // Con el texto normal, no con el tamaño de una cifra.
+    expect(tarjeta("Áreas comunes").getByText("Sin datos").className).not.toContain("text-3xl");
   });
 
   it("la hora de la última actualización va en la hora del condominio", () => {
