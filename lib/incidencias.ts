@@ -70,7 +70,7 @@ export type IncidentDetail = {
   createdAt: string;
   updatedAt: string;
   unit: { code: string };
-  assignee: { name: string; specialty: string } | null;
+  assignee: { id: string; name: string; specialty: string } | null;
   photos: { id: string; url: string }[];
   events: IncidentEvent[];
 };
@@ -121,4 +121,94 @@ export function formatDateTime(iso: string): string {
 /** "06/11/2026" en la hora del condominio. */
 export function formatDate(iso: string): string {
   return DATE.format(new Date(iso));
+}
+
+// ----------------- H12: bandeja del administrador -----------------
+
+export const PRIORITIES = ["ALTA", "MEDIA", "BAJA"] as const;
+
+export function isPriority(value: unknown): value is IncidentPriority {
+  return typeof value === "string" && (PRIORITIES as readonly string[]).includes(value);
+}
+
+export function isLocation(value: unknown): value is string {
+  return typeof value === "string" && LOCATIONS.some((option) => option.value === value);
+}
+
+/** Máximo de la búsqueda por número o título (H12). */
+export const ADMIN_SEARCH_MAX = 80;
+
+export type AdminIncidentItem = {
+  id: string;
+  number: string;
+  title: string;
+  unitCode: string;
+  location: string;
+  status: IncidentStatus;
+  priority: IncidentPriority;
+  assignee: { id: string; name: string } | null;
+  daysOpen: number;
+  createdAt: string;
+};
+
+export type AdminIncidentList = {
+  data: AdminIncidentItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type MaintenanceStaff = {
+  id: string;
+  name: string;
+  specialty: string;
+  phone: string;
+};
+
+/** Filtros de la bandeja; viajan en la URL. `assignee`: uuid o "none". */
+export type AdminFilters = {
+  status?: IncidentStatus;
+  priority?: IncidentPriority;
+  location?: string;
+  assignee?: string;
+  search?: string;
+};
+
+export const GESTION_MESSAGES = {
+  saved: "Cambios guardados",
+  noChanges: "No hay cambios para guardar.",
+  resolved: "La incidencia está resuelta. Reábrela para modificarla.",
+} as const;
+
+/** "Hoy", "1 día", "5 días". */
+export function daysLabel(days: number): string {
+  if (days === 0) return "Hoy";
+  return days === 1 ? "1 día" : `${days} días`;
+}
+
+// ----------------- H13: cambio de estado -----------------
+
+export const NOTE_LIMITS = { min: 10, max: 500 } as const;
+
+export const ESTADO_MESSAGES = {
+  note: "Escribe una observación de 10 a 500 caracteres.",
+  saved: "Estado actualizado",
+  confirm: (number: string, status: IncidentStatus) =>
+    `¿Cambiar la incidencia ${number} a ${STATUS_LABELS[status]}?`,
+} as const;
+
+/** El único cambio permitido desde cada estado (tabla de estados de H13). */
+export const TRANSITIONS: Record<
+  IncidentStatus,
+  { to: IncidentStatus; action: string; noteLabel: string }
+> = {
+  PENDIENTE: { to: "EN_PROCESO", action: "Iniciar atención", noteLabel: "Trabajo que inicia" },
+  EN_PROCESO: { to: "RESUELTO", action: "Marcar como resuelta", noteLabel: "Acciones realizadas" },
+  RESUELTO: { to: "EN_PROCESO", action: "Reabrir", noteLabel: "Motivo de la reapertura" },
+};
+
+/** Valida la observación ya recortada; undefined si es válida. */
+export function validateNote(note: string): string | undefined {
+  const { length } = note.trim();
+  return length < NOTE_LIMITS.min || length > NOTE_LIMITS.max ? ESTADO_MESSAGES.note : undefined;
 }
