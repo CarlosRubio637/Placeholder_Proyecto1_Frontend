@@ -185,3 +185,30 @@ export function daysLabel(days: number): string {
   if (days === 0) return "Hoy";
   return days === 1 ? "1 día" : `${days} días`;
 }
+
+// ----------------- H13: cambio de estado -----------------
+
+export const NOTE_LIMITS = { min: 10, max: 500 } as const;
+
+export const ESTADO_MESSAGES = {
+  note: "Escribe una observación de 10 a 500 caracteres.",
+  saved: "Estado actualizado",
+  confirm: (number: string, status: IncidentStatus) =>
+    `¿Cambiar la incidencia ${number} a ${STATUS_LABELS[status]}?`,
+} as const;
+
+/** El único cambio permitido desde cada estado (tabla de estados de H13). */
+export const TRANSITIONS: Record<
+  IncidentStatus,
+  { to: IncidentStatus; action: string; noteLabel: string }
+> = {
+  PENDIENTE: { to: "EN_PROCESO", action: "Iniciar atención", noteLabel: "Trabajo que inicia" },
+  EN_PROCESO: { to: "RESUELTO", action: "Marcar como resuelta", noteLabel: "Acciones realizadas" },
+  RESUELTO: { to: "EN_PROCESO", action: "Reabrir", noteLabel: "Motivo de la reapertura" },
+};
+
+/** Valida la observación ya recortada; undefined si es válida. */
+export function validateNote(note: string): string | undefined {
+  const { length } = note.trim();
+  return length < NOTE_LIMITS.min || length > NOTE_LIMITS.max ? ESTADO_MESSAGES.note : undefined;
+}
