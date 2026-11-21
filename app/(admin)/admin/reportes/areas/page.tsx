@@ -3,11 +3,12 @@ import { requireRole } from "@/lib/api";
 import {
   REPORTE_AREAS_PATH,
   formatHoras,
-  formatPct,
   getReporteAreas,
   type AreaDestacada,
   type ReporteAreas,
 } from "@/lib/reporte-areas";
+// El mismo formato que el resultado de la asamblea (H24): "80.0 %".
+import { formatPct } from "@/lib/resultados";
 import { todayIso } from "@/lib/reporte-incidencias";
 import { resolvePeriodo, validateRango } from "@/lib/validation/reporte-periodo";
 import { FiltrosPeriodo } from "../_components/filtros-periodo";
