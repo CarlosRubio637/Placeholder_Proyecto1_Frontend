@@ -84,7 +84,7 @@ export function PhotoGallery({ photos, title }: { photos: Photo[]; title: string
                 <button
                   type="button"
                   onClick={() => dialog.current?.close()}
-                  className="rounded-md bg-foreground px-3 py-1.5 font-medium text-background"
+                  className="rounded-md bg-primary hover:bg-primary-hover px-3 py-1.5 font-medium text-primary-foreground"
                   autoFocus
                 >
                   Cerrar

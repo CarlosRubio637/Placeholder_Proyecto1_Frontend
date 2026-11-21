@@ -14,7 +14,7 @@ import { validateSearch } from "@/lib/validation/entrada";
 import { RegistrarEntradaButton } from "./registrar-entrada-button";
 
 const inputClass =
-  "w-full max-w-sm rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
+  "w-full max-w-sm rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100";
 
 type Props = {
   onEntry: (message: string) => void;
@@ -75,7 +75,7 @@ export function BuscarAutorizacion({ onEntry, onSearch }: Props) {
           <button
             type="submit"
             disabled={pending}
-            className="rounded-md bg-foreground px-4 py-2 font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Buscando…" : "Buscar"}
           </button>

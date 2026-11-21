@@ -7,7 +7,7 @@ export default function Error({ retry }: { error: Error & { digest?: string }; r
       <button
         type="button"
         onClick={() => retry()}
-        className="rounded-md bg-foreground px-4 py-2 font-medium text-background"
+        className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground"
       >
         Reintentar
       </button>

@@ -59,7 +59,7 @@ export default async function AsambleasPage(props: PageProps<"/admin/asambleas">
         </div>
         <Link
           href={`${ASAMBLEAS_PATH}/nueva`}
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background"
+          className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground"
         >
           Convocar asamblea
         </Link>

@@ -14,7 +14,7 @@ export default async function PerfilPage() {
   const perfil = await fetchPerfil();
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-4xl flex-col gap-6">
       <h1 className="text-2xl font-semibold">Mi perfil y privacidad</h1>
       <PerfilForm perfil={perfil} />
     </div>

@@ -45,7 +45,7 @@ export default async function ComunicadosPage(
         <h1 className="text-2xl font-semibold">Comunicados</h1>
         <Link
           href="/admin/comunicados/nuevo"
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background"
+          className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground"
         >
           Nuevo comunicado
         </Link>

@@ -20,7 +20,7 @@ type Props = { visitas: MiVisita[]; poll: boolean; emptyMessage: string };
 const thClass = "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500";
 const tdClass = "px-4 py-3 align-top text-sm";
 const smallButton = "rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium disabled:opacity-50 dark:border-zinc-700";
-const primaryButton = "rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background disabled:opacity-50";
+const primaryButton = "rounded-md bg-primary hover:bg-primary-hover px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50";
 
 type Pending = { kind: "cancel" | "reject"; visita: MiVisita };
 

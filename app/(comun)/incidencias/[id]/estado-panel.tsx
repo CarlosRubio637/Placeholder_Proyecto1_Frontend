@@ -106,7 +106,7 @@ export function EstadoPanel({ incidentId, number, status, hasAssignee }: Props) 
             disabled={pending}
             aria-invalid={visibleNoteError ? true : undefined}
             aria-describedby={visibleNoteError ? "estado-nota-error" : undefined}
-            className="w-full resize-y rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100"
+            className="w-full resize-y rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100"
           />
           {visibleNoteError ? (
             <p id="estado-nota-error" className="text-sm text-red-600">
@@ -130,7 +130,7 @@ export function EstadoPanel({ incidentId, number, status, hasAssignee }: Props) 
           <button
             type="submit"
             disabled={Boolean(noteError) || pending}
-            className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Guardando…" : transition.action}
           </button>
@@ -152,7 +152,7 @@ export function EstadoPanel({ incidentId, number, status, hasAssignee }: Props) 
           <button
             type="button"
             onClick={confirm}
-            className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background"
+            className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Confirmar
           </button>

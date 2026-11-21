@@ -37,7 +37,7 @@ type Props = {
 const initialState: GuardarAsambleaState = {};
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 read-only:bg-zinc-50 dark:border-zinc-700 dark:focus:border-zinc-100 dark:read-only:bg-zinc-900";
+  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 read-only:bg-zinc-50 dark:border-zinc-700 dark:focus:border-zinc-100 dark:read-only:bg-zinc-900";
 const secondaryButtonClass =
   "rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700";
 const cardClass = "rounded-xl border border-zinc-200 p-5 dark:border-zinc-800";
@@ -324,7 +324,7 @@ export function AsambleaForm({ id, initial, readOnly = false }: Props) {
               <button
                 type="submit"
                 disabled={hasErrors || pending}
-                className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {pending ? "Guardando…" : "Guardar"}
               </button>

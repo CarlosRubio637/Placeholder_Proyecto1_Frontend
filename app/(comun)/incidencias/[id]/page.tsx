@@ -49,7 +49,7 @@ export default async function DetalleIncidenciaPage(props: PageProps<"/incidenci
     typeof registrada === "string" && NUMBER_REGEX.test(registrada) && registrada === incident.number;
 
   return (
-    <div className="flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-4xl flex-col gap-6">
       {justCreated ? (
         <p
           role="status"

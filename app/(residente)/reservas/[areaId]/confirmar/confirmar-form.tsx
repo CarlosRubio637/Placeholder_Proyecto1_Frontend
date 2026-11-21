@@ -80,7 +80,7 @@ export function ConfirmarReservaForm({ area, date, startTime, backHref }: Props)
           }}
           aria-invalid={attendeesError ? true : undefined}
           aria-describedby={attendeesError ? "attendees-error" : undefined}
-          className="w-32 rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-zinc-900 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100"
+          className="w-32 rounded-md border border-zinc-300 bg-transparent px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-red-600 dark:border-zinc-700 dark:focus:border-zinc-100"
         />
         {attendeesError ? (
           <p id="attendees-error" className="text-sm text-red-600">{attendeesError}</p>
@@ -116,7 +116,7 @@ export function ConfirmarReservaForm({ area, date, startTime, backHref }: Props)
         <button
           type="submit"
           disabled={pending || hasErrors}
-          className="rounded-md bg-foreground px-4 py-2 font-medium text-background transition-opacity disabled:opacity-60"
+          className="rounded-md bg-primary hover:bg-primary-hover px-4 py-2 font-medium text-primary-foreground transition-opacity disabled:opacity-60"
         >
           {pending ? "Confirmando..." : "Confirmar reserva"}
         </button>

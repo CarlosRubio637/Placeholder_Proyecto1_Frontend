@@ -31,7 +31,7 @@ export default async function ConfirmarReservaPage(
 
   if (!area || !endTime || !DATE_ONLY.test(date)) {
     return (
-      <div className="flex max-w-xl flex-col gap-4">
+      <div className="mx-auto w-full flex max-w-xl flex-col gap-4">
         <h1 className="text-2xl font-semibold">Confirmar reserva</h1>
         <p role="alert" className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100">
           {area
@@ -46,7 +46,7 @@ export default async function ConfirmarReservaPage(
   }
 
   return (
-    <div className="flex max-w-xl flex-col gap-6">
+    <div className="mx-auto w-full flex max-w-xl flex-col gap-6">
       <h1 className="text-2xl font-semibold">Confirmar reserva</h1>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-lg border border-zinc-200 p-4 text-sm dark:border-zinc-800">

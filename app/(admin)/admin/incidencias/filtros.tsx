@@ -98,7 +98,7 @@ export function FiltrosIncidencias({ filters, staff }: Props) {
             onChange={(e) => setSearch(e.target.value)}
             maxLength={ADMIN_SEARCH_MAX}
             placeholder="Número o título"
-            className="w-56 rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-zinc-900 dark:border-zinc-700 dark:focus:border-zinc-100"
+            className="w-56 rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-zinc-700 dark:focus:border-zinc-100"
           />
           <button type="submit" disabled={pending} className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium disabled:opacity-60 dark:border-zinc-700">
             Buscar
