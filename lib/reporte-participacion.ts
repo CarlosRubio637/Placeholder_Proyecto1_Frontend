@@ -102,10 +102,3 @@ export async function getOpcionesAsamblea(): Promise<OpcionAsamblea[]> {
     .sort((a, b) => b.startsAt.localeCompare(a.startsAt))
     .map(({ id, title, status }) => ({ id, title, status }));
 }
-
-const numberFormat = new Intl.NumberFormat("es-SV", { maximumFractionDigits: 1 });
-
-/** 72.5 → "72.5 %". */
-export function formatPct(value: number): string {
-  return `${numberFormat.format(value)} %`;
-}

@@ -10,16 +10,17 @@ import {
   validateRango,
   type Periodo,
 } from "@/lib/validation/reporte-periodo";
+import { ExportarReporte } from "./exportar-reporte";
 
 const inputClass =
   "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:border-zinc-100 dark:disabled:bg-zinc-900";
-const buttonClass =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-900";
 
 // Espera antes de consultar, para no navegar en cada dígito del año.
 const DEBOUNCE_MS = 400;
 
 type Props = {
+  /** Reporte que se exporta (H36). */
+  reporte: "areas" | "incidencias";
   /** Ruta del reporte, p. ej. "/admin/reportes/areas". */
   path: string;
   /** Texto bajo las fechas cuando no hay error, después del máximo de días. */
@@ -33,8 +34,8 @@ type Props = {
 // Selector de periodo de los reportes (especificación de H33, usado por H33 y
 // H34): Mes actual, Últimos 3 meses o Personalizado. Consulta al cambiar a un
 // periodo válido, sin botón Consultar. Las fechas solo se editan en
-// Personalizado. Exportar es de H36.
-export function FiltrosPeriodo({ path, ayuda, periodo, desde, hasta }: Props) {
+// Personalizado. Exportar (H36) usa el periodo que se está mostrando.
+export function FiltrosPeriodo({ reporte, path, ayuda, periodo, desde, hasta }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<Periodo>(periodo);
   const [values, setValues] = useState({ desde, hasta });
@@ -143,13 +144,7 @@ export function FiltrosPeriodo({ path, ayuda, periodo, desde, hasta }: Props) {
             Cargando…
           </span>
         ) : null}
-        {/* H36 activa la exportación con los filtros actuales. */}
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar PDF
-        </button>
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar CSV
-        </button>
+        <ExportarReporte reporte={reporte} filtros={{ from: desde, to: hasta }} />
       </div>
     </div>
   );

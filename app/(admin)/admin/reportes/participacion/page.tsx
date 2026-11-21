@@ -6,12 +6,13 @@ import { STATUS_LABELS } from "@/lib/asambleas";
 import { formatFecha } from "@/lib/fechas";
 import {
   PAGE_SIZE,
-  formatPct,
   getOpcionesAsamblea,
   getReporteParticipacion,
   type ParticipacionAsamblea,
   type ReporteParticipacion,
 } from "@/lib/reporte-participacion";
+// El mismo formato que el resultado de la asamblea (H24): "80.0 %".
+import { formatPct } from "@/lib/resultados";
 import { todayIso } from "@/lib/reporte-incidencias";
 import {
   reporteParticipacionHref,
