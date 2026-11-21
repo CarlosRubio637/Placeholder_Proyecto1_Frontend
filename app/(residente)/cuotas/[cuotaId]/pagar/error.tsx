@@ -5,7 +5,7 @@
 export default function PagarCuotaError({ retry }: { retry: () => void }) {
   return (
     <div role="alert" className="flex max-w-xl flex-col items-start gap-3">
-      <p className="text-lg font-medium">No se pudo procesar el pago. Intenta de nuevo.</p>
+      <p className="text-lg font-medium">No se pudo cargar la cuota. Intenta de nuevo.</p>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Revisa tu conexión. Si el problema sigue, avisa a soporte.
       </p>
