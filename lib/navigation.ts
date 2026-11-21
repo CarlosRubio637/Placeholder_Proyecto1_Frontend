@@ -46,6 +46,7 @@ export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { href: "/", label: "Inicio" },
     { href: "/seguridad/entradas", label: "Entradas" },
     { href: "/seguridad/paquetes", label: "Paquetes" },
+    { href: "/seguridad/dentro", label: "Quién está dentro" },
     NOTIFICACIONES,
   ],
 };
