@@ -7,11 +7,10 @@ import {
   type FiltrosParticipacion as Filtros,
 } from "@/lib/validation/reporte-participacion";
 import { MAX_RANGE_DAYS, validateRango } from "@/lib/validation/reporte-periodo";
+import { ExportarReporte } from "../_components/exportar-reporte";
 
 const inputClass =
   "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 aria-invalid:border-red-600 dark:border-zinc-700 dark:bg-zinc-950 dark:focus:border-zinc-100 dark:disabled:bg-zinc-900";
-const buttonClass =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:bg-zinc-900";
 
 // Espera antes de consultar, para no navegar en cada dígito del año.
 const DEBOUNCE_MS = 400;
@@ -24,7 +23,8 @@ type Props = Filtros & {
 // Filtros del reporte de participación (H35): una asamblea ("Todas" por
 // defecto) o el rango de fechas de apertura. Consulta al cambiar un filtro
 // válido, sin botón Consultar, igual que H33 y H34. Con una asamblea elegida
-// las fechas no aplican y quedan deshabilitadas. Exportar es de H36.
+// las fechas no aplican y quedan deshabilitadas. Exportar (H36) usa los
+// filtros que se están mostrando: la asamblea o, si no hay, el periodo.
 export function FiltrosParticipacion({ asamblea, desde, hasta, opciones }: Props) {
   const router = useRouter();
   const [values, setValues] = useState({ asamblea, desde, hasta });
@@ -124,13 +124,10 @@ export function FiltrosParticipacion({ asamblea, desde, hasta, opciones }: Props
             Cargando…
           </span>
         ) : null}
-        {/* H36 activa la exportación con los filtros actuales. */}
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar PDF
-        </button>
-        <button type="button" disabled title="Disponible pronto" className={buttonClass}>
-          Exportar CSV
-        </button>
+        <ExportarReporte
+          reporte="participacion"
+          filtros={asamblea ? { assemblyId: asamblea } : { from: desde, to: hasta }}
+        />
       </div>
     </div>
   );

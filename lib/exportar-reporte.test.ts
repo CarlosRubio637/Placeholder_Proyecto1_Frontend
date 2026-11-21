@@ -8,6 +8,12 @@ describe("H36. Exportación de reportes", () => {
     );
   });
 
+  it("participación con una asamblea elegida manda solo la asamblea", () => {
+    expect(exportarHref("participacion", "pdf", { assemblyId: "5b1b7e0e-6c1f-4a8e-9a43-0f1d3a2b7c9d" })).toBe(
+      "/archivos/admin/reportes/participacion/exportar?format=pdf&assemblyId=5b1b7e0e-6c1f-4a8e-9a43-0f1d3a2b7c9d",
+    );
+  });
+
   it("no manda los filtros vacíos", () => {
     expect(exportarHref("participacion", "csv", { assemblyId: undefined, from: "" })).toBe(
       "/archivos/admin/reportes/participacion/exportar?format=csv",
