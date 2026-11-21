@@ -79,6 +79,10 @@ const REFERENCE_ROUTES: Record<string, Partial<Record<Role, (id: string) => stri
   announcement: {
     RESIDENTE: (id) => `/comunicados/${id}`,
   },
+  // H15: la solicitud de portería (H16) abre "Mis visitas" en Activas.
+  visit: {
+    RESIDENTE: () => "/visitas",
+  },
 };
 
 export function referenceHref(

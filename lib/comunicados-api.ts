@@ -5,6 +5,14 @@ import {
   type ComunicadosFiltro,
   type ComunicadosPagina,
 } from "@/lib/comunicados";
+import {
+  ADMIN_PAGE_SIZE,
+  READERS_PAGE_SIZE,
+  type AdminFiltro,
+  type ComunicadosAdminPagina,
+  type LecturasFiltro,
+  type LecturasPagina,
+} from "@/lib/comunicados-admin";
 
 export type ComunicadosResult =
   | { ok: true; pagina: ComunicadosPagina }
@@ -47,6 +55,63 @@ export async function getComunicados({
   }
   if (res.status === 403) return { ok: false, error: "forbidden" };
   throw new Error(`GET comunicados respondió ${res.status}`);
+}
+
+export type ComunicadosAdminResult =
+  | { ok: true; pagina: ComunicadosAdminPagina }
+  | { ok: false; error: "validation"; message: string }
+  | { ok: false; error: "forbidden" };
+
+export type LecturasResult =
+  | { ok: true; lecturas: LecturasPagina }
+  | { ok: false; error: "not-found" | "forbidden" };
+
+export async function getComunicadosAdmin({
+  status,
+  category,
+  page,
+}: AdminFiltro): Promise<ComunicadosAdminResult> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(ADMIN_PAGE_SIZE),
+  });
+  if (status) params.set("status", status);
+  if (category) params.set("category", category);
+  const res = await apiFetch(`admin/comunicados?${params}`);
+  if (res.ok)
+    return { ok: true, pagina: (await res.json()) as ComunicadosAdminPagina };
+  if (res.status === 400) {
+    const body = await res.json().catch(() => null);
+    return {
+      ok: false,
+      error: "validation",
+      message: firstMessage(body) ?? "Revisa los filtros.",
+    };
+  }
+  if (res.status === 403) return { ok: false, error: "forbidden" };
+  throw new Error(`GET admin/comunicados respondió ${res.status}`);
+}
+
+export async function getLecturas(
+  id: string,
+  { read, page }: LecturasFiltro,
+): Promise<LecturasResult> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(READERS_PAGE_SIZE),
+  });
+  if (read !== null) params.set("read", String(read));
+  const res = await apiFetch(
+    `admin/comunicados/${encodeURIComponent(id)}/lecturas?${params}`,
+  );
+  if (res.ok)
+    return { ok: true, lecturas: (await res.json()) as LecturasPagina };
+  if (res.status === 400 || res.status === 404)
+    return { ok: false, error: "not-found" };
+  if (res.status === 403) return { ok: false, error: "forbidden" };
+  throw new Error(
+    `GET admin/comunicados/${id}/lecturas respondió ${res.status}`,
+  );
 }
 
 export async function abrirComunicado(id: string): Promise<AbrirResult> {
