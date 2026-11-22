@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { guardarArea, type AreaFormState } from "@/app/actions/areas";
 import type { Area } from "@/lib/areas";
 import {
@@ -77,9 +77,18 @@ export function AreaForm({ area }: { area?: Area }) {
 
   return (
     <form
-      action={formAction}
       noValidate
-      onSubmit={() => setTouched({ name: true, capacity: true, rules: true, openTime: true, closeTime: true, slotMinutes: true })}
+      onSubmit={(event) => {
+        // Sin action={formAction}: React reinicia el formulario después de
+        // cada acción y form.reset() devuelve los <select> de hora a 00:00
+        // aunque el estado diga otra cosa. Así "Continuar" reenviaba un
+        // horario vacío. Se envía a mano para que no haya reinicio.
+        event.preventDefault();
+        setTouched({ name: true, capacity: true, rules: true, openTime: true, closeTime: true, slotMinutes: true });
+        const submitter = (event.nativeEvent as SubmitEvent).submitter;
+        const formData = new FormData(event.currentTarget, submitter);
+        startTransition(() => formAction(formData));
+      }}
       className="flex max-w-2xl flex-col gap-4"
     >
       {area ? <input type="hidden" name="id" value={area.id} /> : null}
