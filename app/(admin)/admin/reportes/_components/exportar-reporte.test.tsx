@@ -15,7 +15,7 @@ function fileResponse(disposition: string | null) {
   return new Response("%PDF-", { status: 200, headers });
 }
 
-describe("H36. Botones Exportar PDF y Exportar CSV", () => {
+describe("H36. Exportación de reportes en PDF y CSV", () => {
   const fetchMock = vi.fn();
   const clicks: { href: string; download: string }[] = [];
 
@@ -37,7 +37,7 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     vi.restoreAllMocks();
   });
 
-  it("descarga el reporte con los filtros de la pantalla y el nombre del servidor", async () => {
+  it("AC1: descarga el reporte con los filtros de la pantalla", async () => {
     fetchMock.mockResolvedValue(
       fileResponse('attachment; filename="morosidad_2025-10-28_2026-10-28.pdf"'),
     );
@@ -55,7 +55,30 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("sin Content-Disposition usa <reporte>_<desde>_<hasta>.<ext>", async () => {
+  it.each([
+    ["morosidad", { from: "2025-11-22", to: "2026-11-22" }, "from=2025-11-22&to=2026-11-22"],
+    ["areas", { from: "2026-11-01", to: "2026-11-22" }, "from=2026-11-01&to=2026-11-22"],
+    ["incidencias", { from: "2026-11-01", to: "2026-11-22" }, "from=2026-11-01&to=2026-11-22"],
+    ["participacion", { assemblyId: "as-1" }, "assemblyId=as-1"],
+  ] as const)("AC1: el reporte de %s exporta a PDF con sus filtros", async (reporte, filtros, query) => {
+    fetchMock.mockResolvedValue(fileResponse(null));
+    render(<ExportarReporte reporte={reporte} filtros={filtros} />);
+
+    await act(async () => fireEvent.click(button("Exportar PDF")));
+
+    expect(fetchMock).toHaveBeenCalledWith(`/archivos/admin/reportes/${reporte}/exportar?format=pdf&${query}`);
+  });
+
+  it("AC3: guarda el archivo con el nombre que manda el servidor", async () => {
+    fetchMock.mockResolvedValue(fileResponse('attachment; filename="morosidad_2025-10-28_2026-10-28.csv"'));
+    render(<ExportarReporte reporte="morosidad" filtros={FILTROS} />);
+
+    await act(async () => fireEvent.click(button("Exportar CSV")));
+
+    expect(clicks[0].download).toBe("morosidad_2025-10-28_2026-10-28.csv");
+  });
+
+  it("AC3: sin Content-Disposition usa <reporte>_<desde>_<hasta>.<ext>", async () => {
     fetchMock.mockResolvedValue(fileResponse(null));
     render(<ExportarReporte reporte="areas" filtros={FILTROS} />);
 
@@ -64,7 +87,7 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     expect(clicks[0].download).toBe("areas_2025-10-28_2026-10-28.csv");
   });
 
-  it("mientras genera, el botón dice Generando… y los dos se deshabilitan", async () => {
+  it("AC2: mientras genera, el botón dice Generando… y los dos se deshabilitan", async () => {
     let resolve!: (res: Response) => void;
     fetchMock.mockReturnValue(new Promise<Response>((r) => (resolve = r)));
     render(<ExportarReporte reporte="incidencias" filtros={FILTROS} />);
@@ -80,7 +103,7 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     expect(button("Exportar PDF").disabled).toBe(false);
   });
 
-  it("si falla muestra el mensaje genérico y vuelve a habilitar los botones", async () => {
+  it("AC2: si falla muestra «No se pudo generar el archivo. Intenta de nuevo.» y vuelve a habilitar los botones", async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 502 }));
     render(<ExportarReporte reporte="morosidad" filtros={FILTROS} />);
 
@@ -93,7 +116,7 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     expect(clicks).toEqual([]);
   });
 
-  it("con un error de red también muestra el mensaje genérico", async () => {
+  it("AC2: con un error de red también muestra el mensaje de error", async () => {
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
     render(<ExportarReporte reporte="morosidad" filtros={FILTROS} />);
 
@@ -104,7 +127,7 @@ describe("H36. Botones Exportar PDF y Exportar CSV", () => {
     );
   });
 
-  it("un 400 muestra el mensaje del servidor (más de 5,000 filas)", async () => {
+  it("AC2: un 400 muestra el mensaje del servidor (más de 5,000 filas)", async () => {
     fetchMock.mockResolvedValue(
       Response.json(
         { message: ["El reporte supera 5,000 filas. Reduce el rango."], field: "to" },
